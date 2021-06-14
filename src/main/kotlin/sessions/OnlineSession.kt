@@ -37,8 +37,6 @@ class OnlineSession(): Session {
                 if (whoInvitedToWhoIsInvited.contains(whoInvited) &&
                         whoInvitedToWhoIsInvited[whoInvited] == whoIsInvited) {
                     GameSession(this, whoInvited, whoIsInvited)
-                    nameToClient.remove(whoInvited.name)
-                    nameToClient.remove(whoIsInvited.name)
                     whoIsOnline.remove(whoInvited.name)
                     whoIsOnline.remove(whoIsInvited.name)
                 }
