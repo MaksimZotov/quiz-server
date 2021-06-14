@@ -1,5 +1,6 @@
 package sessions
 
+import common.NamesStorage
 import data.Data
 import data.Exit
 import data.RefusalToPlayAgain

@@ -1,5 +1,6 @@
 package sessions
 
+import common.NamesStorage
 import data.AcceptingTheInvitation
 import data.Data
 import data.Exit
