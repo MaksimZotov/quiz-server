@@ -1,10 +1,31 @@
 package sessions
 
 import data.Data
+import data.Exit
+import data.RefusalToPlayAgain
+import game.GameState
 import network.Client
 
-class GameSession: Session {
+class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val secondPlayer: Client) : Session {
+    val gameState: GameState = GameState(this, firstPlayer.name, secondPlayer.name)
+
+    init {
+        NamesStorage.whoIsInTheGame.addAll(listOf(firstPlayer.name, secondPlayer.name))
+    }
+
     override fun handleDataFromClient(data: Data, client: Client) {
-        TODO("Not yet implemented")
+        when (data) {
+            is RefusalToPlayAgain -> {
+                val clientWhoMustBeNotified = if (client == firstPlayer) firstPlayer else secondPlayer
+                clientWhoMustBeNotified.sendDataToClient(data)
+                NamesStorage.whoIsInTheGame.remove(firstPlayer.name)
+                NamesStorage.whoIsInTheGame.remove(secondPlayer.name)
+                onlineSession.addClient(firstPlayer)
+                onlineSession.addClient(secondPlayer)
+            }
+            is Exit -> {
+
+            }
+        }
     }
 }

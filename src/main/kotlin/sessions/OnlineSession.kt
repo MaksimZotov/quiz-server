@@ -1,17 +1,58 @@
 package sessions
 
+import data.AcceptingTheInvitation
 import data.Data
+import data.Exit
+import data.Invitation
 import network.Client
+import java.lang.Exception
 
-class OnlineSession: Session {
-    private val clients = mutableSetOf<Client>()
+class OnlineSession(): Session {
+    private val whoIsOnline = NamesStorage.whoIsOnline
+    private val nameToClient = NamesStorage.nameToClient
+
+    private val clientsWhoIsOnline = mutableSetOf<Client>()
+
+    private val whoInvitedToWhoIsInvited = mutableMapOf<Client, Client>()
 
     override fun handleDataFromClient(data: Data, client: Client) {
-        TODO("Not yet implemented")
+        when (data) {
+            is Invitation -> {
+                val invitation = data
+                val whoInvited = client
+                val whoIsInvited = nameToClient[invitation.whoIsInvited] ?:
+                    throw Exception("The map nameToClient must contains who is invited")
+
+                if (!whoInvitedToWhoIsInvited.contains(whoInvited) &&
+                        !whoInvitedToWhoIsInvited.values.contains(whoIsInvited)) {
+                    whoInvitedToWhoIsInvited[whoInvited] = whoIsInvited
+                }
+            }
+            is AcceptingTheInvitation -> {
+                val acceptingTheInvitation = data
+                val whoIsInvited = client
+                val whoInvited = nameToClient[acceptingTheInvitation.whoInvited] ?:
+                    throw Exception("The map nameToClient must contains who invited")
+
+                if (whoInvitedToWhoIsInvited.contains(whoInvited) &&
+                        whoInvitedToWhoIsInvited[whoInvited] == whoIsInvited) {
+                    GameSession(this, whoInvited, whoIsInvited)
+                    nameToClient.remove(whoInvited.name)
+                    nameToClient.remove(whoIsInvited.name)
+                    whoIsOnline.remove(whoInvited.name)
+                    whoIsOnline.remove(whoIsInvited.name)
+                }
+            }
+            is Exit -> {
+                TODO()
+            }
+        }
     }
 
-    fun addClientHandler(client: Client) {
+    fun addClient(client: Client) {
         client.session = this
-        clients.add(client)
+        clientsWhoIsOnline.add(client)
+        whoIsOnline.add(client.name)
+        nameToClient[client.name] = client
     }
 }

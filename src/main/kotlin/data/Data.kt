@@ -13,4 +13,5 @@ class Answer(val indexOfAnswer: Int): Data
 class LeavingTheGame(): Data
 class RequestToPlayAgain(): Data
 class RefusalToPlayAgain(): Data
+class Exit(): Data
 

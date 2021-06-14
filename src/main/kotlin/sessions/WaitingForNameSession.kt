@@ -1,26 +1,31 @@
 package sessions
 
 import data.Data
+import data.Exit
 import data.Name
 import network.Client
 
 class WaitingForNameSession: Session {
     private val onlineSession = OnlineSession()
-    private val clients = mutableSetOf<Client>()
+    private val clientsWithoutName = mutableSetOf<Client>()
 
     override fun handleDataFromClient(data: Data, client: Client) {
-        if (data is Name) {
-            val name = data.name
-            if (!NamesStorage.whoIsOnline.contains(name) && !NamesStorage.whoIsInTheGame.contains(name)) {
-                NamesStorage.whoIsOnline.add(name)
-                clients.remove(client)
-                client.name = name
-                onlineSession.addClientHandler(client)
+        when (data){
+            is Name -> {
+                val name = data.name
+                if (!NamesStorage.whoIsOnline.contains(name) && !NamesStorage.whoIsInTheGame.contains(name)) {
+                    client.name = name
+                    clientsWithoutName.remove(client)
+                    onlineSession.addClient(client)
+                }
+            }
+            is Exit -> {
+                client.socket.close()
             }
         }
     }
 
     fun addClient(client: Client) {
-        clients.add(client)
+        clientsWithoutName.add(client)
     }
 }
