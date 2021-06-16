@@ -12,7 +12,9 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
         NamesStorage.whoIsInTheGame.addAll(listOf(firstPlayer.name, secondPlayer.name))
 
         val playTheGame = PlayTheGame()
+        println("SERVER: Sending to the client with name \"${firstPlayer.name}\" PlayTheGame()")
         firstPlayer.sendDataToClient(playTheGame)
+        println("SERVER: Sending to the client with name \"${secondPlayer.name}\" PlayTheGame()")
         secondPlayer.sendDataToClient(playTheGame)
     }
 

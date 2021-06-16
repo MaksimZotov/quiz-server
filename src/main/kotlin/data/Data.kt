@@ -1,12 +1,14 @@
 package data
 
-interface Data
+import java.io.Serializable
+
+interface Data : Serializable
 
 class Name(val name: String): Data
 class RefusalTheName(val name: String): Data
 class AcceptingTheName(val name: String): Data
-class Invitation(val whoIsInvited: String): Data
-class AcceptingTheInvitation(val whoInvited: String): Data
+class Invitation(val name: String): Data
+class AcceptingTheInvitation(val name: String): Data
 class PlayTheGame(): Data
 class RefusalTheInvitation(val whoInvited: String): Data
 class Question(val question: String, val answers: List<String>, val indexOfCorrectAnswer: Int): Data

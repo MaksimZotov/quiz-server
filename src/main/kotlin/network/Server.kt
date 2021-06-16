@@ -9,8 +9,11 @@ class Server {
     private val waitingForNameSession = WaitingForNameSession()
 
     fun start() {
+        println("\nSERVER: The server is running")
         while (true) {
+            println("SERVER: Waiting for a new socket")
             val socket: Socket = serverSocket.accept()
+            println("SERVER: The server got the socket")
             waitingForNameSession.addClient(Client(socket, waitingForNameSession))
         }
     }
