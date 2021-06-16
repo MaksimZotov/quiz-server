@@ -9,7 +9,7 @@ import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.net.Socket
 
-class Server {
+class Server(val receiverFromServer: ReceiverFromServer) {
     private lateinit var clientSocket: Socket
     private lateinit var output: ObjectOutputStream
     private lateinit var input: ObjectInputStream
@@ -36,6 +36,6 @@ class Server {
     }
 
     fun handleDataFromServer(data: Data) {
-        ReceiverFromServer.getData(data)
+        receiverFromServer.getData(data)
     }
 }

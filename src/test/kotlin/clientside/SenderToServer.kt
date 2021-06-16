@@ -3,8 +3,8 @@ package clientside
 import clientside.network.Server
 import data.Data
 
-object SenderToServer {
-    private val server = Server()
+class SenderToServer(receiverFromServer: ReceiverFromServer) {
+    private val server = Server(receiverFromServer)
 
     fun createConnection() {
         server.createConnection()

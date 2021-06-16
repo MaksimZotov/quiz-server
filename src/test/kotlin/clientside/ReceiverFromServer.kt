@@ -2,14 +2,8 @@ package clientside
 
 import data.Data
 
-object ReceiverFromServer : Observable {
-    private lateinit var currentObserver: Observer
-
-    override fun setObserver(observer: Observer) {
-        currentObserver = observer
-    }
-
+class ReceiverFromServer(private val client: Observer) {
     fun getData(data: Data) {
-        currentObserver.getData(data)
+        client.getData(data)
     }
 }
