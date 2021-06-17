@@ -86,13 +86,13 @@ class OnlineSession(): Session {
                     log("SERVER: Sending to the client with name \"${whoWasInvitedByTheClientEarlier.playerName}\" " +
                             "ThePlayerWhoInvitedYouIsWaitingForAcceptingTheInvitationFromAnotherPlayer(\"${client.playerName}\")")
 
-                    whoIsInvited.sendDataToClient(ThePlayerWhoInvitedYouIsWaitingForAcceptingTheInvitationFromAnotherPlayer(client.playerName))
-
-                    log("SERVER: From now the client with name \"${client.playerName}\" does not wait for " +
-                            "AcceptingTheInvitation(\"${client.playerName}\") from the client with name \"${whoWasInvitedByTheClientEarlier.playerName}\"")
+                    whoWasInvitedByTheClientEarlier.sendDataToClient(ThePlayerWhoInvitedYouIsWaitingForAcceptingTheInvitationFromAnotherPlayer(client.playerName))
 
                     whoInvitedToWhoIsInvited.remove(client)
                     whoIsInvitedToWhoInvited.remove(whoWasInvitedByTheClientEarlier)
+
+                    log("SERVER: From now the client with name \"${client.playerName}\" does not wait for " +
+                            "AcceptingTheInvitation(\"${client.playerName}\") from the client with name \"${whoWasInvitedByTheClientEarlier.playerName}\"")
 
                     waitForAcceptingTheInvitation(client, whoIsInvited)
 
@@ -124,8 +124,12 @@ class OnlineSession(): Session {
                             "InvitedPlayerIsWaitingForAcceptingTheInvitationFromAnotherPlayer(\"${client.playerName}\")")
 
                     whoInvitedTheClientEarlier.sendDataToClient(InvitedPlayerIsWaitingForAcceptingTheInvitationFromAnotherPlayer(client.playerName))
+
                     whoInvitedToWhoIsInvited.remove(whoInvitedTheClientEarlier)
                     whoIsInvitedToWhoInvited.remove(client)
+
+                    log("SERVER: From now the client with name \"${whoInvitedTheClientEarlier.playerName}\" does not wait for " +
+                            "AcceptingTheInvitation(\"${client.playerName}\") from the client with name \"${client.playerName}\"")
 
                     waitForAcceptingTheInvitation(client, whoIsInvited)
                 }
