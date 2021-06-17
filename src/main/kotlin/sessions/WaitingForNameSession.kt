@@ -12,7 +12,7 @@ class WaitingForNameSession: Session {
     override fun handleDataFromClient(data: Data, client: Client) {
         when (data){
             is Name -> handleName(data, client)
-            is Exit -> handleExit(data, client)
+            is Exit -> handleExit(client)
             else -> log("SERVER: Unexpected data for the session WaitingForNameSession")
         }
     }
@@ -26,7 +26,7 @@ class WaitingForNameSession: Session {
         log("SERVER: The client has sent Name(\"${name.name}\")")
         val nameStr = name.name
         if (!NamesStorage.whoIsOnline.contains(nameStr) && !NamesStorage.whoIsInTheGame.contains(nameStr)) {
-            log("SERVER: The client with name \"${name.name}\" is moving to OnlineSession")
+            log("SERVER: The client \"${name.name}\" is moving to OnlineSession")
             client.playerName = nameStr
             clientsWithoutName.remove(client)
             onlineSession.addClient(client)
@@ -34,13 +34,13 @@ class WaitingForNameSession: Session {
             log("SERVER: Sending to the client AcceptingTheName(\"${name.name}\")")
             client.sendDataToClient(AcceptingTheName(nameStr))
         } else {
-            log("SERVER: The client with name \"${name.name}\" already exists")
+            log("SERVER: The client \"${name.name}\" already exists")
             log("SERVER: Sending to the client RefusalTheName(\"${name.name}\")")
             client.sendDataToClient(RefusalTheName(nameStr))
         }
     }
 
-    private fun handleExit(exit: Exit, client: Client) {
+    private fun handleExit(client: Client) {
         client.socket.close()
     }
 }
