@@ -17,9 +17,9 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
         log("SERVER: \"${firstPlayer.playerName}\" and \"${secondPlayer.playerName}\" have been added to GameSession")
 
         val playTheGame = PlayTheGame()
-        log("SERVER: Sending to the client with name \"${firstPlayer.playerName}\" PlayTheGame()")
+        log("SERVER: Sending to the client \"${firstPlayer.playerName}\" PlayTheGame()")
         firstPlayer.sendDataToClient(playTheGame)
-        log("SERVER: Sending to the client with name \"${secondPlayer.playerName}\" PlayTheGame()")
+        log("SERVER: Sending to the client \"${secondPlayer.playerName}\" PlayTheGame()")
         secondPlayer.sendDataToClient(playTheGame)
     }
 
@@ -33,7 +33,9 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
     }
 
     private fun handleLeavingTheGame(leavingTheGame: LeavingTheGame, client: Client) {
-        val clientWhoMustBeNotified = if (client == firstPlayer) firstPlayer else secondPlayer
+        log("SERVER: The client \"${client.playerName}\" has sent LeavingTheGame()")
+        val clientWhoMustBeNotified = if (client == firstPlayer) secondPlayer else firstPlayer
+        log("SERVER: Sending to the client \"${clientWhoMustBeNotified.playerName}\" LeavingTheGame()")
         clientWhoMustBeNotified.sendDataToClient(leavingTheGame)
         NamesStorage.whoIsInTheGame.remove(firstPlayer.name)
         NamesStorage.whoIsInTheGame.remove(secondPlayer.name)
@@ -46,7 +48,9 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
     }
 
     private fun handleRefusalToPlayAgain(refusalToPlayAgain: RefusalToPlayAgain, client: Client) {
-        val clientWhoMustBeNotified = if (client == firstPlayer) firstPlayer else secondPlayer
+        log("SERVER: The client \"${client.playerName}\" has sent RefusalToPlayAgain()")
+        val clientWhoMustBeNotified = if (client == firstPlayer) secondPlayer else firstPlayer
+        log("SERVER: Sending to the client \"${clientWhoMustBeNotified.playerName}\" RefusalToPlayAgain()")
         clientWhoMustBeNotified.sendDataToClient(refusalToPlayAgain)
         NamesStorage.whoIsInTheGame.remove(firstPlayer.playerName)
         NamesStorage.whoIsInTheGame.remove(secondPlayer.playerName)
