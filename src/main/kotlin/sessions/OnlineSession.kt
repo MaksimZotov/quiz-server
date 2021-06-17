@@ -136,7 +136,7 @@ class OnlineSession(): Session {
         log("SERVER: The client \"${client.playerName}\" has sent AcceptingTheInvitation(\"${acceptingTheInvitation.name}\")")
 
         if (!nameToClient.contains(acceptingTheInvitation.name) || !whoIsInvitedToWhoInvited.contains(client) ||
-                whoIsInvitedToWhoInvited[client]!!.name != acceptingTheInvitation.name) {
+                whoIsInvitedToWhoInvited[client]!!.playerName != acceptingTheInvitation.name) {
 
             log("SERVER: The client \"${acceptingTheInvitation.name}\" is not invited by the client \"${client.playerName}\"")
 
@@ -154,7 +154,7 @@ class OnlineSession(): Session {
         log("SERVER: The client \"${client.playerName}\" has sent RefusalTheInvitation(\"${refusalTheInvitation.name}\")")
 
         if (!nameToClient.contains(refusalTheInvitation.name) || !whoIsInvitedToWhoInvited.contains(client) ||
-                whoIsInvitedToWhoInvited[client]!!.name != refusalTheInvitation.name) {
+                whoIsInvitedToWhoInvited[client]!!.playerName != refusalTheInvitation.name) {
 
             log("SERVER: The client \"${refusalTheInvitation.name}\" is not invited by the client \"${client.playerName}\"")
 
