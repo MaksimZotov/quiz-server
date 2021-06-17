@@ -8,6 +8,9 @@ class Name(val name: String): Data
 class RefusalTheName(val name: String): Data
 class AcceptingTheName(val name: String): Data
 class Invitation(val name: String): Data
+class IncorrectInvitation(val name: String): Data
+class InvitedPlayerIsWaitingForAcceptingTheInvitationFromAnotherPlayer(val name: String): Data
+class ThePlayerWhoInvitedYouIsWaitingForAcceptingTheInvitationFromAnotherPlayer(val name: String): Data
 class AcceptingTheInvitation(val name: String): Data
 class PlayTheGame(): Data
 class RefusalTheInvitation(val whoInvited: String): Data

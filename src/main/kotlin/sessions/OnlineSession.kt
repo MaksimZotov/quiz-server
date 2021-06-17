@@ -29,32 +29,40 @@ class OnlineSession(): Session {
     fun addClient(client: Client) {
         client.session = this
         clientsWhoIsOnline.add(client)
-        whoIsOnline.add(client.name)
-        nameToClient[client.name] = client
-        log("SERVER: The client with name \"${client.name}\" has been added to OnlineSession")
+        whoIsOnline.add(client.playerName)
+        nameToClient[client.playerName] = client
+        log("SERVER: The client with name \"${client.playerName}\" has been added to OnlineSession")
     }
 
     private fun createGameSession(whoInvited: Client, whoIsInvited: Client) {
-        log("SERVER: Creating GameSession for \"${whoInvited.name}\" and \"${whoIsInvited.name}\"")
+        log("SERVER: Creating GameSession for \"${whoInvited.playerName}\" and \"${whoIsInvited.playerName}\"")
         GameSession(this, whoInvited, whoIsInvited)
-        whoIsOnline.remove(whoInvited.name)
-        whoIsOnline.remove(whoIsInvited.name)
+        whoInvitedToWhoIsInvited.remove(whoInvited)
+        whoIsInvitedToWhoInvited.remove(whoIsInvited)
+        whoIsOnline.remove(whoInvited.playerName)
+        whoIsOnline.remove(whoIsInvited.playerName)
     }
 
     private fun waitForAcceptingTheInvitation(whoInvited: Client, whoIsInvited: Client) {
         whoInvitedToWhoIsInvited[whoInvited] = whoIsInvited
         whoIsInvitedToWhoInvited[whoIsInvited] = whoInvited
-        log("SERVER: Sending to the client with name \"${whoIsInvited.name}\" Invitation(\"${whoInvited.name}\")")
-        whoIsInvited.sendDataToClient(Invitation(whoInvited.name))
-        log("SERVER: The client with name \"${whoInvited.name}\" is waiting for " +
-                "AcceptingTheInvitation(\"${whoInvited.name}\") from the client with name \"${whoIsInvited.name}\"")
+        log("SERVER: Sending to the client with name \"${whoIsInvited.playerName}\" Invitation(\"${whoInvited.playerName}\")")
+        whoIsInvited.sendDataToClient(Invitation(whoInvited.playerName))
+        log("SERVER: The client with name \"${whoInvited.playerName}\" is waiting for " +
+                "AcceptingTheInvitation(\"${whoInvited.playerName}\") from the client with name \"${whoIsInvited.playerName}\"")
     }
 
     private fun handleInvitation(invitation: Invitation, client: Client) {
-        val whoIsInvited = nameToClient[invitation.name] ?:
-            throw Exception("The map nameToClient must contains who is invited")
-
-        log("SERVER: The client with name \"${client.name}\" has sent Invitation(\"${whoIsInvited.name}\")")
+        log("SERVER: The client with name \"${client.playerName}\" has sent Invitation(\"${invitation.name}\")")
+        
+        if (!nameToClient.contains(invitation.name)) {
+            log("SERVER: The client with name \"${invitation.name}\" does not exist")
+            log("SERVER: Sending to the client with name \"${client.playerName}\" IncorrectInvitation(\"${invitation.name}\")")
+            client.sendDataToClient(IncorrectInvitation(invitation.name))
+            return
+        }
+        
+        val whoIsInvited = nameToClient[invitation.name]!!
 
         val clientInvitedSomeone = whoInvitedToWhoIsInvited.contains(client)
         val clientIsInvitedBySomeone = whoIsInvitedToWhoInvited.contains(whoIsInvited)
@@ -64,37 +72,62 @@ class OnlineSession(): Session {
                 waitForAcceptingTheInvitation(client, whoIsInvited)
             }
             clientInvitedSomeone && clientIsInvitedBySomeone -> {
-                if (whoInvitedToWhoIsInvited[client] == whoIsInvited && whoInvitedToWhoIsInvited[whoIsInvited] == client) {
-                    log("SERVER: But the client with name \"${whoIsInvited.name}\" sent " +
-                            "Invitation(\"${whoIsInvited.name}\") to the client with name \"${client.name}\" earlier")
-                    createGameSession(client, whoIsInvited)
+                throw Exception("A situation when the client invited someone and the client is invited by someone is unacceptable")
+            }
+            clientInvitedSomeone && !clientIsInvitedBySomeone -> {
+
+                val whoWasInvitedByTheClientEarlier = whoInvitedToWhoIsInvited[client]!!
+
+                log("SERVER: But the client with name \"${client.playerName}\" sent " +
+                        "Invitation(\"${client.playerName}\") to the client with name \"${whoWasInvitedByTheClientEarlier.playerName}\" earlier")
+
+                if (whoWasInvitedByTheClientEarlier != whoIsInvited) {
+
+                    log("SERVER: Sending to the client with name \"${whoWasInvitedByTheClientEarlier.playerName}\" " +
+                            "ThePlayerWhoInvitedYouIsWaitingForAcceptingTheInvitationFromAnotherPlayer(\"${client.playerName}\")")
+
+                    whoIsInvited.sendDataToClient(ThePlayerWhoInvitedYouIsWaitingForAcceptingTheInvitationFromAnotherPlayer(client.playerName))
+
+                    log("SERVER: From now the client with name \"${client.playerName}\" does not wait for " +
+                            "AcceptingTheInvitation(\"${client.playerName}\") from the client with name \"${whoWasInvitedByTheClientEarlier.playerName}\"")
+
+                    whoInvitedToWhoIsInvited.remove(client)
+                    whoIsInvitedToWhoInvited.remove(whoWasInvitedByTheClientEarlier)
+
+                    waitForAcceptingTheInvitation(client, whoIsInvited)
+
                 } else {
-                    val whoInvitedTheClient = whoIsInvitedToWhoInvited[client] ?:
-                        throw Exception("The map whoIsInvitedToWhoInvited must contains \"${client.name}\"")
 
-                    log("SERVER: But the client with name \"${whoInvitedTheClient.name}\" sent " +
-                            "Invitation(\"${whoInvitedTheClient.name}\") to the client with name \"${client.name}\" earlier")
+                    log("SERVER: Invitation(\"${client.playerName}\") has been sent to the client with name \"${whoIsInvited.playerName}\" earlier")
 
-                    log("SERVER: Sending to the client with name \"${whoInvitedTheClient.name}\" RefusalTheInvitation(\"${client.name}\")")
-                    whoInvitedTheClient.sendDataToClient(RefusalTheInvitation(client.name))
-                    whoInvitedToWhoIsInvited.remove(whoInvitedTheClient)
+                    log("SERVER: The client with name \"${client.playerName}\" is waiting for " +
+                            "AcceptingTheInvitation(\"${client.playerName}\") from the client with name \"${whoIsInvited.playerName}\"")
+                }
+            }
+            !clientInvitedSomeone && clientIsInvitedBySomeone -> {
+
+                val whoInvitedTheClientEarlier = whoIsInvitedToWhoInvited[client]!!
+
+                if (whoInvitedTheClientEarlier == whoIsInvited) {
+
+                    log("SERVER: But the client with name \"${whoIsInvited.playerName}\" sent " +
+                            "Invitation(\"${whoIsInvited.playerName}\") to the client with name \"${client.playerName}\" earlier")
+
+                    createGameSession(client, whoIsInvited)
+
+                } else {
+
+                    log("SERVER: But the client with name \"${whoInvitedTheClientEarlier.playerName}\" sent " +
+                            "Invitation(\"${whoInvitedTheClientEarlier.playerName}\") to the client with name \"${client.playerName}\" earlier")
+
+                    log("SERVER: Sending to the client with name \"${whoInvitedTheClientEarlier.playerName}\" " +
+                            "InvitedPlayerIsWaitingForAcceptingTheInvitationFromAnotherPlayer(\"${client.playerName}\")")
+
+                    whoInvitedTheClientEarlier.sendDataToClient(InvitedPlayerIsWaitingForAcceptingTheInvitationFromAnotherPlayer(client.playerName))
+                    whoInvitedToWhoIsInvited.remove(whoInvitedTheClientEarlier)
                     whoIsInvitedToWhoInvited.remove(client)
 
                     waitForAcceptingTheInvitation(client, whoIsInvited)
-                }
-            }
-            clientInvitedSomeone && !clientIsInvitedBySomeone -> {
-                whoInvitedToWhoIsInvited[client] = whoIsInvited
-                whoIsInvitedToWhoInvited.remove(whoIsInvited)
-                whoIsInvitedToWhoInvited[whoIsInvited] = client
-            }
-            !clientInvitedSomeone && clientIsInvitedBySomeone -> {
-                if (whoInvitedToWhoIsInvited[client] == whoIsInvited && whoInvitedToWhoIsInvited[whoIsInvited] == client) {
-                    createGameSession(client, whoIsInvited)
-                } else {
-                    whoInvitedToWhoIsInvited[client] = whoIsInvited
-                    whoIsInvitedToWhoInvited.remove(whoIsInvited)
-                    whoIsInvitedToWhoInvited[whoIsInvited] = client
                 }
             }
         }
@@ -105,7 +138,7 @@ class OnlineSession(): Session {
         val whoInvited = nameToClient[acceptingTheInvitation.name] ?:
             throw Exception("The map nameToClient must contains who invited")
 
-        log("SERVER: The client with name \"${whoInvited.name}\" has sent AcceptingTheInvitation(\"${whoIsInvited.name}\")")
+        log("SERVER: The client with name \"${whoInvited.playerName}\" has sent AcceptingTheInvitation(\"${whoIsInvited.playerName}\")")
 
         if (whoInvitedToWhoIsInvited.contains(whoInvited) && whoInvitedToWhoIsInvited[whoInvited] == whoIsInvited) {
             createGameSession(whoInvited, whoIsInvited)
@@ -118,8 +151,8 @@ class OnlineSession(): Session {
 
     private fun handleExit(exit: Exit, client: Client) {
         client.socket.close()
-        whoIsOnline.remove(client.name)
-        nameToClient.remove(client.name)
+        whoIsOnline.remove(client.playerName)
+        nameToClient.remove(client.playerName)
         clientsWhoIsOnline.remove(client)
         whoInvitedToWhoIsInvited.filter { entry -> entry.key != client && entry.value != client }
         whoIsInvitedToWhoInvited.filter { entry -> entry.key != client && entry.value != client }
