@@ -7,15 +7,19 @@ import log
 import network.Client
 
 class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val secondPlayer: Client) : Session {
-    val gameState: GameState = GameState(this, firstPlayer.name, secondPlayer.name)
+    val gameState: GameState = GameState(this, firstPlayer.playerName, secondPlayer.playerName)
 
     init {
-        NamesStorage.whoIsInTheGame.addAll(listOf(firstPlayer.name, secondPlayer.name))
+        NamesStorage.whoIsInTheGame.addAll(listOf(firstPlayer.playerName, secondPlayer.playerName))
+
+        firstPlayer.session = this
+        secondPlayer.session = this
+        log("SERVER: \"${firstPlayer.playerName}\" and \"${secondPlayer.playerName}\" have been added to GameSession")
 
         val playTheGame = PlayTheGame()
-        log("SERVER: Sending to the client with name \"${firstPlayer.name}\" PlayTheGame()")
+        log("SERVER: Sending to the client with name \"${firstPlayer.playerName}\" PlayTheGame()")
         firstPlayer.sendDataToClient(playTheGame)
-        log("SERVER: Sending to the client with name \"${secondPlayer.name}\" PlayTheGame()")
+        log("SERVER: Sending to the client with name \"${secondPlayer.playerName}\" PlayTheGame()")
         secondPlayer.sendDataToClient(playTheGame)
     }
 
@@ -44,8 +48,8 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
     private fun handleRefusalToPlayAgain(refusalToPlayAgain: RefusalToPlayAgain, client: Client) {
         val clientWhoMustBeNotified = if (client == firstPlayer) firstPlayer else secondPlayer
         clientWhoMustBeNotified.sendDataToClient(refusalToPlayAgain)
-        NamesStorage.whoIsInTheGame.remove(firstPlayer.name)
-        NamesStorage.whoIsInTheGame.remove(secondPlayer.name)
+        NamesStorage.whoIsInTheGame.remove(firstPlayer.playerName)
+        NamesStorage.whoIsInTheGame.remove(secondPlayer.playerName)
         onlineSession.addClient(firstPlayer)
         onlineSession.addClient(secondPlayer)
     }
