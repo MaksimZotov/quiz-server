@@ -17,12 +17,12 @@ class WaitingForNameSession: Session {
     }
 
     fun addClient(client: Client) {
-        println("SERVER: A new client was registered")
+        println("SERVER: A new client has been registered")
         clientsWithoutName.add(client)
     }
 
     private fun handleName(name: Name, client: Client) {
-        println("SERVER: The client sent Name(\"${name.name}\")")
+        println("SERVER: The client has sent Name(\"${name.name}\")")
         val nameStr = name.name
         if (!NamesStorage.whoIsOnline.contains(nameStr) && !NamesStorage.whoIsInTheGame.contains(nameStr)) {
             println("SERVER: The client with name \"${name.name}\" is moving to OnlineSession")

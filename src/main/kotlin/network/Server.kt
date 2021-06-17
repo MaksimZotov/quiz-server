@@ -13,7 +13,7 @@ class Server {
         while (true) {
             println("SERVER: Waiting for a new socket")
             val socket: Socket = serverSocket.accept()
-            println("SERVER: The server got the socket")
+            println("SERVER: The server has received the socket")
             waitingForNameSession.addClient(Client(socket, waitingForNameSession))
         }
     }

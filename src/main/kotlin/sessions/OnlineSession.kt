@@ -30,7 +30,7 @@ class OnlineSession(): Session {
         clientsWhoIsOnline.add(client)
         whoIsOnline.add(client.name)
         nameToClient[client.name] = client
-        println("SERVER: The client with name \"${client.name}\" was added to OnlineSession")
+        println("SERVER: The client with name \"${client.name}\" has been added to OnlineSession")
     }
 
     private fun handleInvitation(invitation: Invitation, client: Client) {
@@ -38,7 +38,7 @@ class OnlineSession(): Session {
         val whoIsInvited = nameToClient[invitation.name] ?:
             throw Exception("The map nameToClient must contains who is invited")
 
-        println("SERVER: The client with name \"${whoInvited.name}\" sent Invitation(\"${whoIsInvited.name}\")")
+        println("SERVER: The client with name \"${whoInvited.name}\" has sent Invitation(\"${whoIsInvited.name}\")")
 
         val clientInvitedSomeone = whoInvitedToWhoIsInvited.contains(whoInvited)
         val clientIsInvitedBySomeone = whoIsInvitedToWhoInvited.contains(whoIsInvited)
@@ -89,7 +89,7 @@ class OnlineSession(): Session {
         val whoInvited = nameToClient[acceptingTheInvitation.name] ?:
             throw Exception("The map nameToClient must contains who invited")
 
-        println("SERVER: The client with name \"${whoInvited.name}\" sent AcceptingTheInvitation(\"${whoIsInvited.name}\")")
+        println("SERVER: The client with name \"${whoInvited.name}\" has sent AcceptingTheInvitation(\"${whoIsInvited.name}\")")
 
         if (whoInvitedToWhoIsInvited.contains(whoInvited) &&
                 whoInvitedToWhoIsInvited[whoInvited] == whoIsInvited) {

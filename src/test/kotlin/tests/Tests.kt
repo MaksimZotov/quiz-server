@@ -7,19 +7,21 @@ import org.junit.jupiter.api.Test
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.junit.jupiter.api.BeforeEach
 import java.lang.Thread.sleep
 
 
 class Tests {
-    @Test
-    fun testAcceptingAndRefusalTheName_1() {
-        // Server
+    @BeforeEach
+    fun runTheServer() {
         GlobalScope.launch {
             main()
         }
-
         sleep(1000)
+    }
 
+    @Test
+    fun testAcceptingAndRefusalTheName_1() {
         // Client_1
         GlobalScope.launch {
             val client_1: ClientStub = object : ClientStub() {
@@ -28,13 +30,13 @@ class Tests {
                     when (count) {
                         1 -> {
                             assert(data is AcceptingTheName)
-                            println("CLIENT_1: The client got AcceptingTheName: \"${(data as AcceptingTheName).name}\"")
+                            println("CLIENT_1: The client has received AcceptingTheName: \"${(data as AcceptingTheName).name}\"")
                             assertEquals(data.name, AcceptingTheName("Test_1").name)
                         }
                     }
                 }
             }
-            println("CLIENT_1: The client was created")
+            println("CLIENT_1: The client has been created")
 
             println("CLIENT_1: Creating connection")
             client_1.createConnection()
@@ -51,18 +53,18 @@ class Tests {
                     when (count) {
                         1 -> {
                             assert(data is RefusalTheName)
-                            println("CLIENT_2: The client got RefusalTheName(\"${(data as RefusalTheName).name}\")")
+                            println("CLIENT_2: The client has received RefusalTheName(\"${(data as RefusalTheName).name}\")")
                             assertEquals(data.name, AcceptingTheName("Test_1").name)
                         }
                         2 -> {
                             assert(data is AcceptingTheName)
-                            println("CLIENT_2: The client got AcceptingTheName(\"${(data as AcceptingTheName).name}\")")
+                            println("CLIENT_2: The client has received AcceptingTheName(\"${(data as AcceptingTheName).name}\")")
                             assertEquals(data.name, AcceptingTheName("Test_2").name)
                         }
                     }
                 }
             }
-            println("CLIENT_2: The client was created")
+            println("CLIENT_2: The client has been created")
 
             println("CLIENT_2: Delay 1 second...")
             delay(1000)
@@ -84,13 +86,6 @@ class Tests {
 
     @Test
     fun testPlayTheGame_1() {
-        // Server
-        GlobalScope.launch {
-            main()
-        }
-
-        sleep(1000)
-
         // Client_1
         GlobalScope.launch {
             val client_1: ClientStub = object : ClientStub() {
@@ -99,17 +94,17 @@ class Tests {
                     when (count) {
                         1 -> {
                             assert(data is AcceptingTheName)
-                            println("CLIENT_1: The client got AcceptingTheName(\"${(data as AcceptingTheName).name}\")")
+                            println("CLIENT_1: The client has received AcceptingTheName(\"${(data as AcceptingTheName).name}\")")
                             assertEquals(data.name, AcceptingTheName("Test_1").name)
                         }
                         2 -> {
                             assert(data is PlayTheGame)
-                            println("CLIENT_1: The client got PlayTheGame()")
+                            println("CLIENT_1: The client has received PlayTheGame()")
                         }
                     }
                 }
             }
-            println("CLIENT_1: The client was created")
+            println("CLIENT_1: The client has been created")
 
             println("CLIENT_1: Creating connection")
             client_1.createConnection()
@@ -132,24 +127,24 @@ class Tests {
                     when (count) {
                         1 -> {
                             assert(data is AcceptingTheName)
-                            println("CLIENT_2: The client got AcceptingTheName(\"${(data as AcceptingTheName).name}\")")
+                            println("CLIENT_2: The client has received AcceptingTheName(\"${(data as AcceptingTheName).name}\")")
                             assertEquals(data.name, AcceptingTheName("Test_2").name)
                         }
                         2 -> {
                             assert(data is Invitation)
-                            println("CLIENT_2: The client got Invitation(\"${(data as Invitation).name}\")")
+                            println("CLIENT_2: The client has received Invitation(\"${(data as Invitation).name}\")")
                             assertEquals(data.name, Invitation("Test_1").name)
                             println("CLIENT_2: Sending AcceptingTheInvitation(\"${(data as Invitation).name}\")")
                             sendData(AcceptingTheInvitation(data.name))
                         }
                         3 -> {
                             assert(data is PlayTheGame)
-                            println("CLIENT_2: The client got PlayTheGame()")
+                            println("CLIENT_2: The client has received PlayTheGame()")
                         }
                     }
                 }
             }
-            println("CLIENT_2: The client was created")
+            println("CLIENT_2: The client has been created")
 
             println("CLIENT_2: Delay 1 second...")
             delay(1000)
