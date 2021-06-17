@@ -27,7 +27,7 @@ class WaitingForNameSession: Session {
         val nameStr = name.name
         if (!NamesStorage.whoIsOnline.contains(nameStr) && !NamesStorage.whoIsInTheGame.contains(nameStr)) {
             log("SERVER: The client with name \"${name.name}\" is moving to OnlineSession")
-            client.name = nameStr
+            client.playerName = nameStr
             clientsWithoutName.remove(client)
             onlineSession.addClient(client)
 
