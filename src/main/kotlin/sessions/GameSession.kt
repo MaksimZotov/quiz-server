@@ -29,7 +29,12 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
     }
 
     private fun handleLeavingTheGame(leavingTheGame: LeavingTheGame, client: Client) {
-        TODO()
+        val clientWhoMustBeNotified = if (client == firstPlayer) firstPlayer else secondPlayer
+        clientWhoMustBeNotified.sendDataToClient(leavingTheGame)
+        NamesStorage.whoIsInTheGame.remove(firstPlayer.name)
+        NamesStorage.whoIsInTheGame.remove(secondPlayer.name)
+        onlineSession.addClient(firstPlayer)
+        onlineSession.addClient(secondPlayer)
     }
 
     private fun handleRequestToPlayAgain(requestToPlayAgain: RequestToPlayAgain, client: Client) {
