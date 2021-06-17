@@ -1,6 +1,7 @@
 package network
 
 import data.Data
+import log
 import sessions.Session
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -19,13 +20,13 @@ class Client(val socket: Socket, var session: Session) : Thread() {
     override fun run() {
         while (true) {
             val data = input.readObject() as Data
-            println("SERVER: The server has received the data")
+            log("SERVER: The server has received the data")
             session.handleDataFromClient(data, this)
         }
     }
 
     fun sendDataToClient(data: Data) {
-        println("SERVER: The server has sent the data")
+        log("SERVER: The server has sent the data")
         output.writeObject(data)
         output.flush()
         output.reset()

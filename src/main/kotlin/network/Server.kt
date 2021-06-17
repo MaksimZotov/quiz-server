@@ -1,5 +1,6 @@
 package network
 
+import log
 import sessions.WaitingForNameSession
 import java.net.ServerSocket
 import java.net.Socket
@@ -9,11 +10,11 @@ class Server {
     private val waitingForNameSession = WaitingForNameSession()
 
     fun start() {
-        println("\nSERVER: The server is running")
+        log("\nSERVER: The server is running")
         while (true) {
-            println("SERVER: Waiting for a new socket")
+            log("SERVER: Waiting for a new socket")
             val socket: Socket = serverSocket.accept()
-            println("SERVER: The server has received the socket")
+            log("SERVER: The server has received the socket")
             waitingForNameSession.addClient(Client(socket, waitingForNameSession))
         }
     }
