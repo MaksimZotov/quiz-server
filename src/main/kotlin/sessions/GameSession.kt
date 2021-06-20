@@ -3,10 +3,11 @@ package sessions
 import common.NamesStorage
 import data.*
 import game.GameState
+import game.GameStateSender
 import log
 import network.Client
 
-class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val secondPlayer: Client) : Session {
+class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val secondPlayer: Client) : Session, GameStateSender {
     val gameState: GameState = GameState(this, firstPlayer.playerName, secondPlayer.playerName)
 
     init {
@@ -25,6 +26,7 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
 
     override fun handleDataFromClient(data: Data, client: Client) {
         when (data) {
+            is Answer -> handleAnswer(data, client)
             is LeavingTheGame -> handleLeavingTheGame(data, client)
             is RequestToPlayAgain -> handleRequestToPlayAgain(data, client)
             is RefusalToPlayAgain -> handleRefusalToPlayAgain(data, client)
@@ -32,7 +34,13 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
         }
     }
 
+    private fun handleAnswer(answer: Answer, client: Client) {
+        log("SERVER: The client \"${client.playerName}\" has sent Answer(${answer.indexOfAnswer})")
+        gameState.getAnswer(client.playerName, answer.indexOfAnswer)
+    }
+
     private fun handleLeavingTheGame(leavingTheGame: LeavingTheGame, client: Client) {
+        gameState.stopGame()
         log("SERVER: The client \"${client.playerName}\" has sent LeavingTheGame()")
         val clientWhoMustBeNotified = if (client == firstPlayer) secondPlayer else firstPlayer
         log("SERVER: Sending to the client \"${clientWhoMustBeNotified.playerName}\" LeavingTheGame()")
@@ -60,5 +68,31 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
 
     private fun handleExit(exit: Exit, client: Client) {
         TODO()
+    }
+
+
+    override fun sendScore(playerNameToScore: Map<String, Int>) {
+        val playerScore = playerNameToScore[firstPlayer.name]!!
+        val scoreOfAnotherPlayer = playerNameToScore[secondPlayer.name]!!
+        firstPlayer.sendDataToClient(Score(playerScore, scoreOfAnotherPlayer))
+        secondPlayer.sendDataToClient(Score(scoreOfAnotherPlayer, playerScore))
+    }
+
+    override fun sendQuestion(question: Triple<String, List<String>, Int>) {
+        val questionData = Question(question.first, question.second, question.third)
+        firstPlayer.sendDataToClient(questionData)
+        secondPlayer.sendDataToClient(questionData)
+    }
+
+    override fun sendRemainingTime(remainingTime: Double) {
+        val remainingTimeData = RemainingTime(remainingTime)
+        firstPlayer.sendDataToClient(remainingTimeData)
+        secondPlayer.sendDataToClient(remainingTimeData)
+    }
+
+    override fun sendFinish() {
+        val finishData = FinishTheGame()
+        firstPlayer.sendDataToClient(finishData)
+        secondPlayer.sendDataToClient(finishData)
     }
 }
