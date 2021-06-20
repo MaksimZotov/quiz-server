@@ -39,8 +39,6 @@ class GameState(private val gameStateSender: GameStateSender, val nameOfFirstPla
                     delay(timeDelay)
                     remainingTime -= timeDecrement
                 }
-                log("GAME: Sending to clients \"${nameOfFirstPlayer}\" and " +
-                        "\"${nameOfSecondPlayer}\" the remaining time $remainingTime")
                 gameStateSender.sendRemainingTime(remainingTime)
                 quantityOfRemainingQuestions--
             }
