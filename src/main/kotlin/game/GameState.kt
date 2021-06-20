@@ -54,9 +54,12 @@ class GameState(private val gameStateSender: GameStateSender, val nameOfFirstPla
 
     fun getAnswer(playerName: String, indexOfAnswer: Int) {
         check(playerNameToScore.contains(playerName))
-        playerNameToScore[playerName]!!.plus(if (indexOfAnswer == indexOfCorrectAnswer) 1 else -1)
+        playerNameToScore[playerName] = playerNameToScore[playerName]!! +
+                if (indexOfAnswer == indexOfCorrectAnswer) 1 else -1
+
         log("GAME: Sending to clients \"${nameOfFirstPlayer}\" and " +
                 "\"${nameOfSecondPlayer}\" the score $playerNameToScore")
+
         gameStateSender.sendScore(playerNameToScore)
     }
 
