@@ -45,8 +45,8 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
         val clientWhoMustBeNotified = if (client == firstPlayer) secondPlayer else firstPlayer
         log("SERVER: Sending to the client \"${clientWhoMustBeNotified.playerName}\" LeavingTheGame()")
         clientWhoMustBeNotified.sendDataToClient(leavingTheGame)
-        NamesStorage.whoIsInTheGame.remove(firstPlayer.name)
-        NamesStorage.whoIsInTheGame.remove(secondPlayer.name)
+        NamesStorage.whoIsInTheGame.remove(firstPlayer.playerName)
+        NamesStorage.whoIsInTheGame.remove(secondPlayer.playerName)
         onlineSession.addClient(firstPlayer)
         onlineSession.addClient(secondPlayer)
     }
@@ -72,8 +72,8 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
 
 
     override fun sendScore(playerNameToScore: Map<String, Int>) {
-        val playerScore = playerNameToScore[firstPlayer.name]!!
-        val scoreOfAnotherPlayer = playerNameToScore[secondPlayer.name]!!
+        val playerScore = playerNameToScore[firstPlayer.playerName]!!
+        val scoreOfAnotherPlayer = playerNameToScore[secondPlayer.playerName]!!
         firstPlayer.sendDataToClient(Score(playerScore, scoreOfAnotherPlayer))
         secondPlayer.sendDataToClient(Score(scoreOfAnotherPlayer, playerScore))
     }
