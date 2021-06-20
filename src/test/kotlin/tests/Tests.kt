@@ -86,7 +86,7 @@ class Tests {
     }
 
     @Test
-    fun testPlayTheGame_1() {
+    fun testGame_1() {
         // Client_1
         GlobalScope.launch {
             val client_1: ClientStub = object : ClientStub() {
@@ -101,6 +101,29 @@ class Tests {
                         2 -> {
                             assert(data is PlayTheGame)
                             log("CLIENT_1: The client has received PlayTheGame()")
+                        }
+                        in 3..(21 * 5 + 2) -> {
+                            if ((count - 3) % 21 == 0) {
+                                if (data !is Question) {
+                                    val t = 0
+                                }
+                                assert(data is Question)
+                                val data = data as Question
+                                log("CLIENT_1: The client has received Question(" +
+                                        data.question + " " + data.answers + " " + data.indexOfCorrectAnswer +
+                                        ")")
+                            }
+                            else {
+                                assert(data is RemainingTime)
+                                val data = data as RemainingTime
+                                log("CLIENT_1: The client has received RemainingTime(" +
+                                        data.time +
+                                        ")")
+                            }
+                        }
+                        108 -> {
+                            assert(data is FinishTheGame)
+                            log("CLIENT_1: The client has received FinishTheGame()")
                         }
                     }
                 }
@@ -142,6 +165,29 @@ class Tests {
                             assert(data is PlayTheGame)
                             log("CLIENT_2: The client has received PlayTheGame()")
                         }
+                        in 4..(21 * 5 + 3) -> {
+                            if ((count - 4) % 21 == 0) {
+                                if (data !is Question) {
+                                    val t = 0
+                                }
+                                assert(data is Question)
+                                val data = data as Question
+                                log("CLIENT_2: The client has received Question(" +
+                                        data.question + " " + data.answers + " " + data.indexOfCorrectAnswer +
+                                        ")")
+                            }
+                            else {
+                                assert(data is RemainingTime)
+                                val data = data as RemainingTime
+                                log("CLIENT_2: The client has received RemainingTime(" +
+                                        data.time +
+                                        ")")
+                            }
+                        }
+                        109 -> {
+                            assert(data is FinishTheGame)
+                            log("CLIENT_2: The client has received FinishTheGame()")
+                        }
                     }
                 }
             }
@@ -156,7 +202,6 @@ class Tests {
             log("CLIENT_2: Sending Name(\"Test_2\")")
             client_2.sendData(Name("Test_2"))
         }
-        sleep(4000)
+        sleep(30000)
     }
 }
-

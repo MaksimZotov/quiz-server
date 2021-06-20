@@ -41,6 +41,9 @@ class GameState(private val gameStateSender: GameStateSender, val nameOfFirstPla
                 }
                 quantityOfRemainingQuestions--
             }
+            log("GAME: Sending to clients \"${nameOfFirstPlayer}\" and " +
+                    "\"${nameOfSecondPlayer}\" that game is finished")
+            gameStateSender.sendFinish()
         }
     }
 
