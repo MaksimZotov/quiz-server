@@ -102,25 +102,18 @@ class Tests {
                             assert(data is PlayTheGame)
                             log("CLIENT_1: The client has received PlayTheGame()")
                         }
-                        in 3..(21 * 5 + 2) -> {
-                            if ((count - 3) % 21 == 0) {
-                                assert(data is Question)
-                                val data = data as Question
+                        else -> {
+                            if (data is Question) {
                                 log("CLIENT_1: The client has received Question(" +
                                         data.question + " " + data.answers + " " + data.indexOfCorrectAnswer +
                                         ")")
-                            }
-                            else {
-                                assert(data is RemainingTime)
-                                val data = data as RemainingTime
+                            } else if (data is RemainingTime) {
                                 log("CLIENT_1: The client has received RemainingTime(" +
                                         data.time +
                                         ")")
+                            } else if (data is FinishTheGame) {
+                                log("CLIENT_1: The client has received FinishTheGame()")
                             }
-                        }
-                        108 -> {
-                            assert(data is FinishTheGame)
-                            log("CLIENT_1: The client has received FinishTheGame()")
                         }
                     }
                 }
@@ -162,25 +155,18 @@ class Tests {
                             assert(data is PlayTheGame)
                             log("CLIENT_2: The client has received PlayTheGame()")
                         }
-                        in 4..(21 * 5 + 3) -> {
-                            if ((count - 4) % 21 == 0) {
-                                assert(data is Question)
-                                val data = data as Question
+                        else -> {
+                            if (data is Question) {
                                 log("CLIENT_2: The client has received Question(" +
                                         data.question + " " + data.answers + " " + data.indexOfCorrectAnswer +
                                         ")")
-                            }
-                            else {
-                                assert(data is RemainingTime)
-                                val data = data as RemainingTime
+                            } else if (data is RemainingTime) {
                                 log("CLIENT_2: The client has received RemainingTime(" +
                                         data.time +
                                         ")")
+                            } else if (data is FinishTheGame) {
+                                log("CLIENT_2: The client has received FinishTheGame()")
                             }
-                        }
-                        109 -> {
-                            assert(data is FinishTheGame)
-                            log("CLIENT_2: The client has received FinishTheGame()")
                         }
                     }
                 }
