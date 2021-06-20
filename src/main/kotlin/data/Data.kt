@@ -17,7 +17,7 @@ class PlayTheGame(): Data
 class RefusalTheInvitation(val name: String): Data
 class IncorrectRefusalTheInvitation(val name: String): Data
 class Question(val question: String, val answers: List<String>, val indexOfCorrectAnswer: Int): Data
-class RemainingTime(val time: Double): Data
+class RemainingTime(val time: Int): Data
 class Score(val player: Int, val anotherPlayer: Int): Data
 class Answer(val indexOfAnswer: Int): Data
 class LeavingTheGame(): Data

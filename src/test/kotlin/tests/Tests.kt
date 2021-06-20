@@ -182,6 +182,6 @@ class Tests {
             log("CLIENT_2: Sending Name(\"Test_2\")")
             client_2.sendData(Name("Test_2"))
         }
-        sleep(30000)
+        sleep(60000)
     }
 }

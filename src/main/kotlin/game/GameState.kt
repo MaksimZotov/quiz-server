@@ -12,8 +12,8 @@ class GameState(private val gameStateSender: GameStateSender, val nameOfFirstPla
     private val questionsPool: QuestionsPool = Database
 
     private val quantityOfQuestions = 5
-    private val timeToAnswer = 5.0
-    private val timeDecrement = 0.25
+    private val timeToAnswer = 10
+    private val timeDecrement = 1
     private val timeDelay = (timeDecrement * 1000).toLong()
 
     private val maxNumberOfQuestion = 3
@@ -32,13 +32,16 @@ class GameState(private val gameStateSender: GameStateSender, val nameOfFirstPla
                         "\"${nameOfSecondPlayer}\" the question $question")
                 gameStateSender.sendQuestion(question)
                 var remainingTime = timeToAnswer
-                while (remainingTime > 0) {
+                while (remainingTime >= 0) {
                     log("GAME: Sending to clients \"${nameOfFirstPlayer}\" and " +
                             "\"${nameOfSecondPlayer}\" the remaining time $remainingTime")
                     gameStateSender.sendRemainingTime(remainingTime)
                     delay(timeDelay)
                     remainingTime -= timeDecrement
                 }
+                log("GAME: Sending to clients \"${nameOfFirstPlayer}\" and " +
+                        "\"${nameOfSecondPlayer}\" the remaining time $remainingTime")
+                gameStateSender.sendRemainingTime(remainingTime)
                 quantityOfRemainingQuestions--
             }
             log("GAME: Sending to clients \"${nameOfFirstPlayer}\" and " +

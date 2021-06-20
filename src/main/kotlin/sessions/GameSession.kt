@@ -84,7 +84,7 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
         secondPlayer.sendDataToClient(questionData)
     }
 
-    override fun sendRemainingTime(remainingTime: Double) {
+    override fun sendRemainingTime(remainingTime: Int) {
         val remainingTimeData = RemainingTime(remainingTime)
         firstPlayer.sendDataToClient(remainingTimeData)
         secondPlayer.sendDataToClient(remainingTimeData)
