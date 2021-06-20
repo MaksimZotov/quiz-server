@@ -31,6 +31,7 @@ class GameState(private val gameStateSender: GameStateSender, val nameOfFirstPla
                 log("GAME: Sending to clients \"${nameOfFirstPlayer}\" and " +
                         "\"${nameOfSecondPlayer}\" the question $question")
                 gameStateSender.sendQuestion(question)
+                indexOfCorrectAnswer = question.third
                 var remainingTime = timeToAnswer
                 while (remainingTime >= 0) {
                     log("GAME: Sending to clients \"${nameOfFirstPlayer}\" and " +
