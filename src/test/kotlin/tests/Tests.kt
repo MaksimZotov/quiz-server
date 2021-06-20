@@ -104,9 +104,6 @@ class Tests {
                         }
                         in 3..(21 * 5 + 2) -> {
                             if ((count - 3) % 21 == 0) {
-                                if (data !is Question) {
-                                    val t = 0
-                                }
                                 assert(data is Question)
                                 val data = data as Question
                                 log("CLIENT_1: The client has received Question(" +
@@ -167,9 +164,6 @@ class Tests {
                         }
                         in 4..(21 * 5 + 3) -> {
                             if ((count - 4) % 21 == 0) {
-                                if (data !is Question) {
-                                    val t = 0
-                                }
                                 assert(data is Question)
                                 val data = data as Question
                                 log("CLIENT_2: The client has received Question(" +
