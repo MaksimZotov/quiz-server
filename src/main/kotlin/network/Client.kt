@@ -26,7 +26,6 @@ class Client(val socket: Socket, var session: Session) : Thread() {
     }
 
     fun sendDataToClient(data: Data) {
-        log("SERVER: The server has sent the data")
         output.writeObject(data)
         output.flush()
         output.reset()
