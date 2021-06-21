@@ -26,10 +26,11 @@ class Client(val socket: Socket, var session: Session) : Thread() {
                 log("SERVER: The server has received the data")
                 session.handleDataFromClient(data, this)
             } catch (ex: Exception) {
-                log("SERVER: The server has received the incorrect data")
                 if (this::playerName.isInitialized) {
+                    log("SERVER: An error occurred while reading the data from the client \"$playerName\"")
                     log("SERVER: Hard removing the client \"$playerName\"")
                 } else {
+                    log("SERVER: An error occurred while reading the data from an unnamed client")
                     log("SERVER: Hard removing an unnamed client")
                 }
                 session.handleDataFromClient(HardRemovalOfThePlayer(), this)

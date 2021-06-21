@@ -182,6 +182,9 @@ object OnlineSession : Session {
 
             log("SERVER: From now the client \"${whoInvited.playerName}\" does not wait for " +
                     "AcceptingTheInvitation(\"${client.playerName}\") from the client \"${client.playerName}\"")
+
+            log("SERVER: Sending to the client \"${whoInvited.playerName}\" RefusalTheInvitation(\"${client.name}\")")
+            whoInvited.sendDataToClient(RefusalTheInvitation(client.playerName))
         }
     }
 

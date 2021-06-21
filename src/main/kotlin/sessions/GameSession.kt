@@ -71,6 +71,12 @@ class GameSession(
             gameState = GameState(this, firstPlayer.playerName, secondPlayer.playerName)
             firstPlayerWantsToPlayAgain = false
             secondPlayerWantsToPlayAgain = false
+
+            val playTheGame = PlayTheGame()
+            log("SERVER: Sending to the client \"${firstPlayer.playerName}\" PlayTheGame()")
+            firstPlayer.sendDataToClient(playTheGame)
+            log("SERVER: Sending to the client \"${secondPlayer.playerName}\" PlayTheGame()")
+            secondPlayer.sendDataToClient(playTheGame)
         }
     }
 
