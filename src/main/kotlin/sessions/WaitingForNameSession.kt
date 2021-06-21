@@ -22,7 +22,7 @@ object WaitingForNameSession: Session {
             client.session = this
             log("SERVER: The client \"${client.playerName}\" has been moved from OnlineSession to WaitingForNameSession")
         } else {
-            log("SERVER: A new client \"${client.playerName}\" has been registered")
+            log("SERVER: A new client has been registered")
         }
         clientsWithoutName.add(client)
     }
