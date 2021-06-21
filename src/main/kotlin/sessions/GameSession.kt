@@ -8,7 +8,9 @@ import log
 import network.Client
 
 class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val secondPlayer: Client) : Session, GameStateSender {
-    val gameState: GameState = GameState(this, firstPlayer.playerName, secondPlayer.playerName)
+    var gameState = GameState(this, firstPlayer.playerName, secondPlayer.playerName)
+    var firstPlayerWantsToPlayAgain = false
+    var secondPlayerWantsToPlayAgain = false
 
     init {
         NamesStorage.whoIsInTheGame.addAll(listOf(firstPlayer.playerName, secondPlayer.playerName))
@@ -28,7 +30,7 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
         when (data) {
             is Answer -> handleAnswer(data, client)
             is LeavingTheGame -> handleLeavingTheGame(data, client)
-            is RequestToPlayAgain -> handleRequestToPlayAgain(data, client)
+            is RequestToPlayAgain -> handleRequestToPlayAgain(client)
             is RefusalToPlayAgain -> handleRefusalToPlayAgain(data, client)
             is Exit -> handleExit(data, client)
         }
@@ -51,8 +53,16 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
         onlineSession.addClient(secondPlayer)
     }
 
-    private fun handleRequestToPlayAgain(requestToPlayAgain: RequestToPlayAgain, client: Client) {
-        TODO()
+    private fun handleRequestToPlayAgain(client: Client) {
+        when (client) {
+            firstPlayer -> firstPlayerWantsToPlayAgain = true
+            secondPlayer -> secondPlayerWantsToPlayAgain = true
+        }
+        if (firstPlayerWantsToPlayAgain && secondPlayerWantsToPlayAgain) {
+            gameState = GameState(this, firstPlayer.playerName, secondPlayer.playerName)
+            firstPlayerWantsToPlayAgain = false
+            secondPlayerWantsToPlayAgain = false
+        }
     }
 
     private fun handleRefusalToPlayAgain(refusalToPlayAgain: RefusalToPlayAgain, client: Client) {
