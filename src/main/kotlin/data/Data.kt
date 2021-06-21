@@ -25,5 +25,5 @@ class LeavingTheGame(): Data
 class FinishTheGame(): Data
 class RequestToPlayAgain(): Data
 class RefusalToPlayAgain(): Data
-class Exit(): Data
+class HardRemovalOfThePlayer(): Data
 

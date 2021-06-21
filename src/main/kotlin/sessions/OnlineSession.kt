@@ -22,8 +22,12 @@ object OnlineSession : Session {
             is AcceptingTheInvitation -> handleAcceptingTheInvitation(data, client)
             is RefusalTheInvitation -> handleRefusalTheInvitation(data, client)
             is NameChange -> handleNameChange(client)
-            is Exit -> handleExit(client)
-            else -> log("SERVER: Unexpected data for the session OnlineSession")
+            is HardRemovalOfThePlayer -> handleHardRemovalOfThePlayer(client)
+            else -> {
+                log("SERVER: Unexpected data for the session OnlineSession")
+                log("SERVER: Hard removing the client \"${client.playerName}\"")
+                handleHardRemovalOfThePlayer(client)
+            }
         }
     }
 
@@ -186,7 +190,7 @@ object OnlineSession : Session {
         removeClientFromOnlineSession(client)
     }
 
-    private fun handleExit(client: Client) {
+    private fun handleHardRemovalOfThePlayer(client: Client) {
         client.socket.close()
         removeClientFromOnlineSession(client)
     }

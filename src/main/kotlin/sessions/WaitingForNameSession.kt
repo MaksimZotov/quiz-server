@@ -10,10 +10,14 @@ object WaitingForNameSession: Session {
     private val clientsWithoutName = mutableSetOf<Client>()
 
     override fun handleDataFromClient(data: Data, client: Client) {
-        when (data){
+        when (data) {
             is Name -> handleName(data, client)
-            is Exit -> handleExit(client)
-            else -> log("SERVER: Unexpected data for the session WaitingForNameSession")
+            is HardRemovalOfThePlayer -> handleHardRemovalOfThePlayer(client)
+            else -> {
+                log("SERVER: Unexpected data for the session WaitingForNameSession")
+                log("SERVER: Hard removing an unnamed client")
+                handleHardRemovalOfThePlayer(client)
+            }
         }
     }
 
@@ -45,7 +49,8 @@ object WaitingForNameSession: Session {
         }
     }
 
-    private fun handleExit(client: Client) {
+    private fun handleHardRemovalOfThePlayer(client: Client) {
         client.socket.close()
+        clientsWithoutName.remove(client)
     }
 }

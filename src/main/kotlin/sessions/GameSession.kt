@@ -7,7 +7,11 @@ import game.GameStateSender
 import log
 import network.Client
 
-class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val secondPlayer: Client) : Session, GameStateSender {
+class GameSession(
+        private val onlineSession: OnlineSession,
+        private val firstPlayer: Client,
+        private val secondPlayer: Client) : Session, GameStateSender {
+
     var gameState = GameState(this, firstPlayer.playerName, secondPlayer.playerName)
     var firstPlayerWantsToPlayAgain = false
     var secondPlayerWantsToPlayAgain = false
@@ -32,7 +36,12 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
             is LeavingTheGame -> handleLeavingTheGame(data, client)
             is RequestToPlayAgain -> handleRequestToPlayAgain(client)
             is RefusalToPlayAgain -> handleRefusalToPlayAgain(data, client)
-            is Exit -> handleExit(data, client)
+            is HardRemovalOfThePlayer -> handleHardRemovalOfThePlayer(client)
+            else -> {
+                log("SERVER: Unexpected data for the session GameSession")
+                log("SERVER: Hard removing the client \"${client.playerName}\"")
+                handleHardRemovalOfThePlayer(client)
+            }
         }
     }
 
@@ -76,8 +85,13 @@ class GameSession(val onlineSession: OnlineSession, val firstPlayer: Client, val
         onlineSession.addClient(secondPlayer)
     }
 
-    private fun handleExit(exit: Exit, client: Client) {
-        TODO()
+    private fun handleHardRemovalOfThePlayer(client: Client) {
+        client.socket.close()
+        val clientWhoMustBeNotified = if (client == firstPlayer) secondPlayer else firstPlayer
+        log("SERVER: Sending to the client \"${clientWhoMustBeNotified.playerName}\" HardRemovalOfThePlayer()")
+        clientWhoMustBeNotified.sendDataToClient(HardRemovalOfThePlayer())
+        NamesStorage.nameToClient.remove(client.playerName)
+        NamesStorage.whoIsInTheGame.remove(client.playerName)
     }
 
 

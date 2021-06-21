@@ -1,15 +1,12 @@
 package clientside.network
 
 import clientside.ReceiverFromServer
-import clientside.network.Reader
-import clientside.network.Sender
 import data.Data
-import data.Exit
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.net.Socket
 
-class Server(val receiverFromServer: ReceiverFromServer) {
+class Server(private val receiverFromServer: ReceiverFromServer) {
     private lateinit var clientSocket: Socket
     private lateinit var output: ObjectOutputStream
     private lateinit var input: ObjectInputStream
@@ -25,7 +22,6 @@ class Server(val receiverFromServer: ReceiverFromServer) {
     }
 
     fun closeConnection() {
-        sender.sendDataToServer(Exit())
         clientSocket.close()
         input.close()
         output.close()

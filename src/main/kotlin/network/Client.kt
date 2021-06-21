@@ -1,6 +1,7 @@
 package network
 
 import data.Data
+import data.HardRemovalOfThePlayer
 import log
 import sessions.Session
 import java.io.ObjectInputStream
@@ -19,9 +20,19 @@ class Client(val socket: Socket, var session: Session) : Thread() {
 
     override fun run() {
         while (true) {
-            val data = input.readObject() as Data
-            log("SERVER: The server has received the data")
-            session.handleDataFromClient(data, this)
+            val data = input.readObject()
+            if (data is Data) {
+                log("SERVER: The server has received the data")
+                session.handleDataFromClient(data, this)
+            } else {
+                log("SERVER: The server has received the incorrect data")
+                if (this::playerName.isInitialized) {
+                    log("SERVER: Hard removing the client \"$playerName\"")
+                } else {
+                    log("SERVER: Hard removing an unnamed client")
+                }
+                session.handleDataFromClient(HardRemovalOfThePlayer(), this)
+            }
         }
     }
 
