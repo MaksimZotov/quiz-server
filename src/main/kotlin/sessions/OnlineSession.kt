@@ -6,7 +6,7 @@ import log
 import network.Client
 import java.lang.Exception
 
-class OnlineSession(): Session {
+object OnlineSession : Session {
     private val whoIsOnline = NamesStorage.whoIsOnline
     private val nameToClient = NamesStorage.nameToClient
 
@@ -21,6 +21,7 @@ class OnlineSession(): Session {
             is Invitation -> handleInvitation(data, client)
             is AcceptingTheInvitation -> handleAcceptingTheInvitation(data, client)
             is RefusalTheInvitation -> handleRefusalTheInvitation(data, client)
+            is NameChange -> handleNameChange(client)
             is Exit -> handleExit(client)
             else -> log("SERVER: Unexpected data for the session OnlineSession")
         }
@@ -50,6 +51,14 @@ class OnlineSession(): Session {
         whoIsInvited.sendDataToClient(Invitation(whoInvited.playerName))
         log("SERVER: The client \"${whoInvited.playerName}\" is waiting for " +
                 "AcceptingTheInvitation(\"${whoInvited.playerName}\") from the client \"${whoIsInvited.playerName}\"")
+    }
+
+    private fun removeClientFromOnlineSession(client: Client) {
+        whoIsOnline.remove(client.playerName)
+        nameToClient.remove(client.playerName)
+        clientsWhoIsOnline.remove(client)
+        whoInvitedToWhoIsInvited.remove(client)
+        whoIsInvitedToWhoInvited.remove(client)
     }
 
     private fun handleInvitation(invitation: Invitation, client: Client) {
@@ -172,12 +181,13 @@ class OnlineSession(): Session {
         }
     }
 
+    private fun handleNameChange(client: Client) {
+        WaitingForNameSession.addClient(client)
+        removeClientFromOnlineSession(client)
+    }
+
     private fun handleExit(client: Client) {
         client.socket.close()
-        whoIsOnline.remove(client.playerName)
-        nameToClient.remove(client.playerName)
-        clientsWhoIsOnline.remove(client)
-        whoInvitedToWhoIsInvited.remove(client)
-        whoIsInvitedToWhoInvited.remove(client)
+        removeClientFromOnlineSession(client)
     }
 }

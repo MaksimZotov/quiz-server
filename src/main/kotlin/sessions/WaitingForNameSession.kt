@@ -5,8 +5,8 @@ import data.*
 import log
 import network.Client
 
-class WaitingForNameSession: Session {
-    private val onlineSession = OnlineSession()
+object WaitingForNameSession: Session {
+    private val onlineSession = OnlineSession
     private val clientsWithoutName = mutableSetOf<Client>()
 
     override fun handleDataFromClient(data: Data, client: Client) {
@@ -18,7 +18,12 @@ class WaitingForNameSession: Session {
     }
 
     fun addClient(client: Client) {
-        log("SERVER: A new client has been registered")
+        if (client.session == OnlineSession) {
+            client.session = this
+            log("SERVER: The client \"${client.playerName}\" has been moved from OnlineSession to WaitingForNameSession")
+        } else {
+            log("SERVER: A new client \"${client.playerName}\" has been registered")
+        }
         clientsWithoutName.add(client)
     }
 
