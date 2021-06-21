@@ -7,6 +7,7 @@ interface Data : Serializable
 class Name(val name: String): Data
 class RefusalTheName(val name: String): Data
 class AcceptingTheName(val name: String): Data
+class NameChange(): Data
 class Invitation(val name: String): Data
 class IncorrectInvitation(val name: String): Data
 class InvitedPlayerIsDecidingWhetherToPlayWithAnotherPlayer(val name: String): Data
