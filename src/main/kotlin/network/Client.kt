@@ -40,8 +40,19 @@ class Client(val socket: Socket, var session: Session) : Thread() {
     }
 
     fun sendDataToClient(data: Data) {
-        output.writeObject(data)
-        output.flush()
-        output.reset()
+        try {
+            output.writeObject(data)
+            output.flush()
+            output.reset()
+        } catch (ex: Exception) {
+            if (this::playerName.isInitialized) {
+                log("SERVER: An error occurred while sending the data to the client \"$playerName\"")
+                log("SERVER: Hard removing the client \"$playerName\"")
+            } else {
+                log("SERVER: An error occurred while sending the data to an unnamed client")
+                log("SERVER: Hard removing an unnamed client")
+            }
+            session.handleDataFromClient(HardRemovalOfThePlayer(), this)
+        }
     }
 }
