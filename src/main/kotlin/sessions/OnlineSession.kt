@@ -67,6 +67,11 @@ object OnlineSession : Session {
 
     private fun handleInvitation(invitation: Invitation, client: Client) {
         log("SERVER: The client \"${client.playerName}\" has sent Invitation(\"${invitation.name}\")")
+
+        if (client.playerName == invitation.name) {
+            log("SERVER: Sending to the client \"${client.playerName}\" InvitationMyself()")
+            client.sendDataToClient(InvitationMyself())
+        }
         
         if (!nameToClient.contains(invitation.name)) {
             log("SERVER: The client \"${invitation.name}\" does not exist")
