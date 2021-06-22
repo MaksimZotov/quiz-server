@@ -71,6 +71,7 @@ object OnlineSession : Session {
         if (client.playerName == invitation.name) {
             log("SERVER: Sending to the client \"${client.playerName}\" InvitationMyself()")
             client.sendDataToClient(InvitationMyself())
+            return
         }
         
         if (!nameToClient.contains(invitation.name)) {
