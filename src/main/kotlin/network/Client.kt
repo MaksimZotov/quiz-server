@@ -34,6 +34,7 @@ class Client(val socket: Socket, var session: Session) : Thread() {
                     log("SERVER: Hard removing an unnamed client")
                 }
                 session.handleDataFromClient(HardRemovalOfThePlayer(), this)
+                break
             }
         }
     }
