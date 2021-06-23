@@ -27,3 +27,5 @@ class FinishTheGame(): Data
 class RequestToPlayAgain(): Data
 class RefusalToPlayAgain(): Data
 class HardRemovalOfThePlayer(): Data
+class Ping() : Data
+class Pong() : Data

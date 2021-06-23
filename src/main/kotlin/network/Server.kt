@@ -1,5 +1,6 @@
 package network
 
+import common.Cleaner
 import log
 import sessions.WaitingForNameSession
 import java.net.ServerSocket
@@ -9,11 +10,12 @@ object Server {
     private val serverSocket: ServerSocket = ServerSocket(80)
 
     fun start() {
-        log("SERVER: The server is running")
+        log("The server is running")
+        Cleaner.start()
         while (true) {
-            log("SERVER: Waiting for a new socket")
+            log("Waiting for a new socket")
             val socket: Socket = serverSocket.accept()
-            log("SERVER: The server has received the socket")
+            log("The server has received the socket")
             WaitingForNameSession.addClient(Client(socket, WaitingForNameSession))
         }
     }

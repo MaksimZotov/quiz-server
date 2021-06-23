@@ -8,7 +8,12 @@ import log
 import questionspool.Database
 import questionspool.QuestionsPool
 
-class GameState(private val gameStateSender: GameStateSender, val nameOfFirstPlayer: String, val nameOfSecondPlayer: String) {
+class GameState(
+        private val gameStateSender:
+        GameStateSender,
+        val nameOfFirstPlayer: String,
+        val nameOfSecondPlayer: String) {
+
     private val questionsPool: QuestionsPool = Database
 
     private val quantityOfQuestions = 5
@@ -28,13 +33,13 @@ class GameState(private val gameStateSender: GameStateSender, val nameOfFirstPla
             var quantityOfRemainingQuestions = quantityOfQuestions
             while (quantityOfRemainingQuestions > 0) {
                 val question = questionsPool.getQuestion(getNumberOfQuestion())
-                log("GAME: Sending to clients \"${nameOfFirstPlayer}\" and " +
+                log("Sending to clients \"${nameOfFirstPlayer}\" and " +
                         "\"${nameOfSecondPlayer}\" the question $question")
                 gameStateSender.sendQuestion(question)
                 indexOfCorrectAnswer = question.third
                 var remainingTime = timeToAnswer
                 while (remainingTime >= 0) {
-                    log("GAME: Sending to clients \"${nameOfFirstPlayer}\" and " +
+                    log("Sending to clients \"${nameOfFirstPlayer}\" and " +
                             "\"${nameOfSecondPlayer}\" the remaining time $remainingTime")
                     gameStateSender.sendRemainingTime(remainingTime)
                     delay(timeDelay)
@@ -42,7 +47,7 @@ class GameState(private val gameStateSender: GameStateSender, val nameOfFirstPla
                 }
                 quantityOfRemainingQuestions--
             }
-            log("GAME: Sending to clients \"${nameOfFirstPlayer}\" and " +
+            log("Sending to clients \"${nameOfFirstPlayer}\" and " +
                     "\"${nameOfSecondPlayer}\" that game is finished")
             gameStateSender.sendFinish()
         }
@@ -50,7 +55,7 @@ class GameState(private val gameStateSender: GameStateSender, val nameOfFirstPla
 
     fun stopGame() {
         work.cancel()
-        log("GAME: The game is canceled for clients \"${nameOfFirstPlayer}\" and \"${nameOfSecondPlayer}\"")
+        log("The game is canceled for clients \"${nameOfFirstPlayer}\" and \"${nameOfSecondPlayer}\"")
     }
 
     fun getAnswer(playerName: String, indexOfAnswer: Int) {
@@ -58,7 +63,7 @@ class GameState(private val gameStateSender: GameStateSender, val nameOfFirstPla
         playerNameToScore[playerName] = playerNameToScore[playerName]!! +
                 if (indexOfAnswer == indexOfCorrectAnswer) 1 else -1
 
-        log("GAME: Sending to clients \"${nameOfFirstPlayer}\" and " +
+        log("Sending to clients \"${nameOfFirstPlayer}\" and " +
                 "\"${nameOfSecondPlayer}\" the score $playerNameToScore")
 
         gameStateSender.sendScore(playerNameToScore)
