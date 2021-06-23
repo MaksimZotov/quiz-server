@@ -28,8 +28,8 @@ class Client(val socket: Socket, var session: Session) : Thread() {
                 val data = input.readObject() as Data
                 log("The server has received the data")
                 if (data is Pong) {
-                    log("The server has received Pong()")
                     receivedPong = true
+                    continue
                 }
                 session.handleDataFromClient(data, this)
             } catch (ex: Exception) {
@@ -79,9 +79,5 @@ class Client(val socket: Socket, var session: Session) : Thread() {
             }
             session.handleDataFromClient(HardRemovalOfThePlayer(), this)
         }
-    }
-
-    private fun getPong() {
-
     }
 }
