@@ -2,8 +2,6 @@ package network
 
 import Logging
 import storage.Cleaner
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import sessions.WaitingForNameSession
 import java.net.ServerSocket
 import java.net.Socket
@@ -17,13 +15,11 @@ object Server {
     fun start() {
         log("The server is running")
         Cleaner.start()
-        GlobalScope.launch {
-            while (true) {
-                log("Waiting for a new socket")
-                val socket: Socket = serverSocket.accept()
-                log("The server has received the socket")
-                WaitingForNameSession.addClient(Client(socket, WaitingForNameSession))
-            }
+        while (true) {
+            log("Waiting for a new socket")
+            val socket: Socket = serverSocket.accept()
+            log("The server has received the socket")
+            WaitingForNameSession.addClient(Client(socket, WaitingForNameSession))
         }
     }
 }
