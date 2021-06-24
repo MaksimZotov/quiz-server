@@ -8,6 +8,7 @@ import data.Pong
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import sessions.Session
+import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.net.Socket
@@ -18,14 +19,23 @@ class Client(val socket: Socket, var session: Session) {
 
     private val thisClient = this
 
-    private val input: ObjectInputStream = ObjectInputStream(socket.getInputStream())
-    private val output: ObjectOutputStream = ObjectOutputStream(socket.getOutputStream())
+    lateinit var name: String
+
+    private lateinit var input: ObjectInputStream
+    private lateinit var output: ObjectOutputStream
 
     var receivedPong = true
 
-    lateinit var name: String
-
     init {
+        try {
+            input = ObjectInputStream(socket.getInputStream())
+            output = ObjectOutputStream(socket.getOutputStream())
+        } catch(ex: IOException) {
+            log("An error occurred during initialization of the client $thisClient")
+            log("Hard removing the client $thisClient")
+            session.handleDataFromClient(HardRemovalOfThePlayer(), this)
+        }
+
         GlobalScope.launch {
             while (true) {
                 try {
