@@ -6,6 +6,7 @@ import data.HardRemovalOfThePlayer
 import data.Ping
 import data.Pong
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import sessions.Session
 import java.io.IOException
@@ -13,7 +14,7 @@ import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.net.Socket
 
-class Client(val socket: Socket, var session: Session) {
+class Client(private val socket: Socket, var session: Session) {
     private val logging = Logging("Client")
     private val log: (text: String) -> Unit = { text -> logging.log(text) }
 
@@ -26,6 +27,8 @@ class Client(val socket: Socket, var session: Session) {
 
     var receivedPong = true
 
+    val job: Job
+
     init {
         try {
             input = ObjectInputStream(socket.getInputStream())
@@ -36,7 +39,7 @@ class Client(val socket: Socket, var session: Session) {
             session.handleDataFromClient(HardRemovalOfThePlayer(), this)
         }
 
-        GlobalScope.launch {
+        job = GlobalScope.launch {
             while (true) {
                 try {
                     val data = input.readObject() as Data
@@ -72,6 +75,12 @@ class Client(val socket: Socket, var session: Session) {
     fun sendPing() {
         receivedPong = false
         sendDataToClient(Ping())
+    }
+
+    fun stop() {
+        job.cancel()
+        socket.close()
+        log("The client $this has been stopped")
     }
 
     override fun toString(): String {

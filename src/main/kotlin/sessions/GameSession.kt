@@ -62,8 +62,8 @@ class GameSession(
         log("The client $client has sent LeavingTheGame()")
         val clientsWhoMustBeNotified = players.filter { it != client }
         log("Sending to the clients $clientsWhoMustBeNotified LeavingTheGame()")
-        clientsWhoMustBeNotified.forEach {
-            it.sendDataToClient(leavingTheGame)
+        clientsWhoMustBeNotified.forEach { it.sendDataToClient(leavingTheGame) }
+        players.forEach {
             whoIsInTheGame.remove(it.name)
             onlineSession.addClient(it)
         }
@@ -84,21 +84,23 @@ class GameSession(
         log("The client \"${client.name}\" has sent RefusalToPlayAgain()")
         val clientsWhoMustBeNotified = players.filter { it != client }
         log("Sending to the clients $clientsWhoMustBeNotified RefusalToPlayAgain()")
-        clientsWhoMustBeNotified.forEach {
-            it.sendDataToClient(refusalToPlayAgain)
+        clientsWhoMustBeNotified.forEach { it.sendDataToClient(refusalToPlayAgain) }
+        players.forEach {
             whoIsInTheGame.remove(it.name)
             onlineSession.addClient(it)
         }
     }
 
     private fun handleHardRemovalOfThePlayer(hardRemovalOfThePlayer: HardRemovalOfThePlayer, client: Client) {
-        client.socket.close()
+        client.stop()
+        whoIsInTheGame.remove(client.name)
+        nameToClient.remove(client.name)
         val clientsWhoMustBeNotified = players.filter { it != client }
         log("Sending to the clients $clientsWhoMustBeNotified HardRemovalOfThePlayer()")
         clientsWhoMustBeNotified.forEach {
             it.sendDataToClient(hardRemovalOfThePlayer)
-            nameToClient.remove(it.name)
             whoIsInTheGame.remove(it.name)
+            onlineSession.addClient(it)
         }
     }
 

@@ -211,7 +211,7 @@ object OnlineSession : Session {
     }
 
     private fun handleHardRemovalOfThePlayer(client: Client) {
-        client.socket.close()
+        client.stop()
         removeClientFromOnlineSession(client)
     }
 }

@@ -56,7 +56,7 @@ object WaitingForNameSession: Session {
     }
 
     private fun handleHardRemovalOfThePlayer(client: Client) {
-        client.socket.close()
+        client.stop()
         clientsWithoutName.remove(client)
     }
 }
