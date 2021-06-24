@@ -1,10 +1,10 @@
 package sessions
 
-import common.ClientsStorage
+import Logging
+import storage.ClientsStorage
 import data.*
 import game.GameState
 import game.GameStateSender
-import log
 import network.Client
 
 class GameSession(
@@ -12,21 +12,24 @@ class GameSession(
         private val firstPlayer: Client,
         private val secondPlayer: Client) : Session, GameStateSender {
 
-    var gameState = GameState(this, firstPlayer.playerName, secondPlayer.playerName)
+    private val logging = Logging("GameSession")
+    private val log: (text: String) -> Unit = { text -> logging.log(text) }
+
+    var gameState = GameState(this, firstPlayer.name, secondPlayer.name)
     var firstPlayerWantsToPlayAgain = false
     var secondPlayerWantsToPlayAgain = false
 
     init {
-        ClientsStorage.whoIsInTheGame.addAll(listOf(firstPlayer.playerName, secondPlayer.playerName))
+        ClientsStorage.whoIsInTheGame.addAll(listOf(firstPlayer.name, secondPlayer.name))
 
         firstPlayer.session = this
         secondPlayer.session = this
-        log("\"${firstPlayer.playerName}\" and \"${secondPlayer.playerName}\" have been added to GameSession")
+        log("$firstPlayer and $secondPlayer have been added to GameSession")
 
         val playTheGame = PlayTheGame()
-        log("Sending to the client \"${firstPlayer.playerName}\" PlayTheGame()")
+        log("Sending to the client $firstPlayer PlayTheGame()")
         firstPlayer.sendDataToClient(playTheGame)
-        log("Sending to the client \"${secondPlayer.playerName}\" PlayTheGame()")
+        log("Sending to the client $secondPlayer PlayTheGame()")
         secondPlayer.sendDataToClient(playTheGame)
     }
 
@@ -39,25 +42,25 @@ class GameSession(
             is HardRemovalOfThePlayer -> handleHardRemovalOfThePlayer(client)
             else -> {
                 log("Unexpected data for the session GameSession")
-                log("Hard removing the client \"${client.playerName}\"")
+                log("Hard removing the client \"${client.name}\"")
                 handleHardRemovalOfThePlayer(client)
             }
         }
     }
 
     private fun handleAnswer(answer: Answer, client: Client) {
-        log("The client \"${client.playerName}\" has sent Answer(${answer.indexOfAnswer})")
-        gameState.getAnswer(client.playerName, answer.indexOfAnswer)
+        log("The client \"${client.name}\" has sent Answer(${answer.indexOfAnswer})")
+        gameState.getAnswer(client.name, answer.indexOfAnswer)
     }
 
     private fun handleLeavingTheGame(leavingTheGame: LeavingTheGame, client: Client) {
         gameState.stopGame()
-        log("The client \"${client.playerName}\" has sent LeavingTheGame()")
+        log("The client \"${client.name}\" has sent LeavingTheGame()")
         val clientWhoMustBeNotified = if (client == firstPlayer) secondPlayer else firstPlayer
-        log("Sending to the client \"${clientWhoMustBeNotified.playerName}\" LeavingTheGame()")
+        log("Sending to the client \"${clientWhoMustBeNotified.name}\" LeavingTheGame()")
         clientWhoMustBeNotified.sendDataToClient(leavingTheGame)
-        ClientsStorage.whoIsInTheGame.remove(firstPlayer.playerName)
-        ClientsStorage.whoIsInTheGame.remove(secondPlayer.playerName)
+        ClientsStorage.whoIsInTheGame.remove(firstPlayer.name)
+        ClientsStorage.whoIsInTheGame.remove(secondPlayer.name)
         onlineSession.addClient(firstPlayer)
         onlineSession.addClient(secondPlayer)
     }
@@ -68,25 +71,25 @@ class GameSession(
             secondPlayer -> secondPlayerWantsToPlayAgain = true
         }
         if (firstPlayerWantsToPlayAgain && secondPlayerWantsToPlayAgain) {
-            gameState = GameState(this, firstPlayer.playerName, secondPlayer.playerName)
+            gameState = GameState(this, firstPlayer.name, secondPlayer.name)
             firstPlayerWantsToPlayAgain = false
             secondPlayerWantsToPlayAgain = false
 
             val playTheGame = PlayTheGame()
-            log("Sending to the client \"${firstPlayer.playerName}\" PlayTheGame()")
+            log("Sending to the client $firstPlayer PlayTheGame()")
             firstPlayer.sendDataToClient(playTheGame)
-            log("Sending to the client \"${secondPlayer.playerName}\" PlayTheGame()")
+            log("Sending to the client $secondPlayer PlayTheGame()")
             secondPlayer.sendDataToClient(playTheGame)
         }
     }
 
     private fun handleRefusalToPlayAgain(refusalToPlayAgain: RefusalToPlayAgain, client: Client) {
-        log("The client \"${client.playerName}\" has sent RefusalToPlayAgain()")
+        log("The client \"${client.name}\" has sent RefusalToPlayAgain()")
         val clientWhoMustBeNotified = if (client == firstPlayer) secondPlayer else firstPlayer
-        log("Sending to the client \"${clientWhoMustBeNotified.playerName}\" RefusalToPlayAgain()")
+        log("Sending to the client \"${clientWhoMustBeNotified.name}\" RefusalToPlayAgain()")
         clientWhoMustBeNotified.sendDataToClient(refusalToPlayAgain)
-        ClientsStorage.whoIsInTheGame.remove(firstPlayer.playerName)
-        ClientsStorage.whoIsInTheGame.remove(secondPlayer.playerName)
+        ClientsStorage.whoIsInTheGame.remove(firstPlayer.name)
+        ClientsStorage.whoIsInTheGame.remove(secondPlayer.name)
         onlineSession.addClient(firstPlayer)
         onlineSession.addClient(secondPlayer)
     }
@@ -94,16 +97,16 @@ class GameSession(
     private fun handleHardRemovalOfThePlayer(client: Client) {
         client.socket.close()
         val clientWhoMustBeNotified = if (client == firstPlayer) secondPlayer else firstPlayer
-        log("Sending to the client \"${clientWhoMustBeNotified.playerName}\" HardRemovalOfThePlayer()")
+        log("Sending to the client \"${clientWhoMustBeNotified.name}\" HardRemovalOfThePlayer()")
         clientWhoMustBeNotified.sendDataToClient(HardRemovalOfThePlayer())
-        ClientsStorage.nameToClient.remove(client.playerName)
-        ClientsStorage.whoIsInTheGame.remove(client.playerName)
+        ClientsStorage.nameToClient.remove(client.name)
+        ClientsStorage.whoIsInTheGame.remove(client.name)
     }
 
 
     override fun sendScore(playerNameToScore: Map<String, Int>) {
-        val playerScore = playerNameToScore[firstPlayer.playerName]!!
-        val scoreOfAnotherPlayer = playerNameToScore[secondPlayer.playerName]!!
+        val playerScore = playerNameToScore[firstPlayer.name]!!
+        val scoreOfAnotherPlayer = playerNameToScore[secondPlayer.name]!!
         firstPlayer.sendDataToClient(Score(playerScore, scoreOfAnotherPlayer))
         secondPlayer.sendDataToClient(Score(scoreOfAnotherPlayer, playerScore))
     }

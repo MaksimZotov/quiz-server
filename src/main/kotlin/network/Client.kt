@@ -1,47 +1,48 @@
 package network
 
+import Logging
 import data.Data
 import data.HardRemovalOfThePlayer
 import data.Ping
 import data.Pong
-import log
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import sessions.Session
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.net.Socket
 
-class Client(val socket: Socket, var session: Session) : Thread() {
+class Client(val socket: Socket, var session: Session) {
+    private val logging = Logging("Client")
+    private val log: (text: String) -> Unit = { text -> logging.log(text) }
+
+    private val thisClient = this
+
     private val input: ObjectInputStream = ObjectInputStream(socket.getInputStream())
     private val output: ObjectOutputStream = ObjectOutputStream(socket.getOutputStream())
 
     var receivedPong = true
 
-    lateinit var playerName: String
+    lateinit var name: String
 
     init {
-        start()
-    }
-
-    override fun run() {
-        while (true) {
-            try {
-                val data = input.readObject() as Data
-                log("The server has received the data")
-                if (data is Pong) {
-                    receivedPong = true
-                    continue
+        GlobalScope.launch {
+            while (true) {
+                try {
+                    val data = input.readObject() as Data
+                    log("The server has received the data from the client $thisClient")
+                    if (data is Pong) {
+                        log("The client $thisClient has sent Pong()")
+                        receivedPong = true
+                        continue
+                    }
+                    session.handleDataFromClient(data, thisClient)
+                } catch (ex: Exception) {
+                    log("An error occurred while sending the data to the client $thisClient")
+                    log("Hard removing the client $thisClient")
+                    session.handleDataFromClient(HardRemovalOfThePlayer(), thisClient)
+                    break
                 }
-                session.handleDataFromClient(data, this)
-            } catch (ex: Exception) {
-                if (this::playerName.isInitialized) {
-                    log("An error occurred while reading the data from the client \"$playerName\"")
-                    log("Hard removing the client \"$playerName\"")
-                } else {
-                    log("An error occurred while reading the data from an unnamed client")
-                    log("Hard removing an unnamed client")
-                }
-                session.handleDataFromClient(HardRemovalOfThePlayer(), this)
-                break
             }
         }
     }
@@ -52,13 +53,8 @@ class Client(val socket: Socket, var session: Session) : Thread() {
             output.flush()
             output.reset()
         } catch (ex: Exception) {
-            if (this::playerName.isInitialized) {
-                log("An error occurred while sending the data to the client \"$playerName\"")
-                log("Hard removing the client \"$playerName\"")
-            } else {
-                log("An error occurred while sending the data to an unnamed client")
-                log("Hard removing an unnamed client")
-            }
+            log("An error occurred while sending the data to the client $thisClient")
+            log("Hard removing the client $thisClient")
             session.handleDataFromClient(HardRemovalOfThePlayer(), this)
         }
     }
@@ -70,14 +66,13 @@ class Client(val socket: Socket, var session: Session) : Thread() {
             output.flush()
             output.reset()
         } catch (ex: Exception) {
-            if (this::playerName.isInitialized) {
-                log("An error occurred while sending the data to the client \"$playerName\"")
-                log("Hard removing the client \"$playerName\"")
-            } else {
-                log("An error occurred while sending the data to an unnamed client")
-                log("Hard removing an unnamed client")
-            }
+            log("An error occurred while sending the data to the client $thisClient")
+            log("Hard removing the client $thisClient")
             session.handleDataFromClient(HardRemovalOfThePlayer(), this)
         }
+    }
+
+    override fun toString(): String {
+        return if (this::name.isInitialized) "\"$name\"" else "\"${super.toString()}\""
     }
 }

@@ -1,13 +1,15 @@
-package common
+package storage
 
+import Logging
 import data.HardRemovalOfThePlayer
-import data.Ping
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import log
 
 object Cleaner {
+    private val logging = Logging("Cleaner")
+    private val log: (text: String) -> Unit = { text -> logging.log(text) }
+
     val timeDelay = 10000.toLong()
     val hardRemovalOfThePlayer = HardRemovalOfThePlayer()
 
@@ -20,6 +22,7 @@ object Cleaner {
                 delay(timeDelay)
                 clients.forEach {
                     if (!it.receivedPong) {
+                        log("Removing the client $it")
                         it.session.handleDataFromClient(hardRemovalOfThePlayer, it)
                     }
                 }

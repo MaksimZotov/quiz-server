@@ -1,18 +1,22 @@
 package game
 
+import Logging
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import log
-import questionspool.Database
-import questionspool.QuestionsPool
+import questions.Database
+import questions.QuestionsPool
 
 class GameState(
-        private val gameStateSender:
-        GameStateSender,
-        val nameOfFirstPlayer: String,
-        val nameOfSecondPlayer: String) {
+        private val gameStateSender: GameStateSender,
+        private val nameOfFirstPlayer: String,
+        private val nameOfSecondPlayer: String) {
+
+    private val maxNumberOfQuestion = 3
+
+    private val logging = Logging("GameState")
+    private val log: (text: String) -> Unit = { text -> logging.log(text) }
 
     private val questionsPool: QuestionsPool = Database
 
@@ -21,15 +25,13 @@ class GameState(
     private val timeDecrement = 1
     private val timeDelay = (timeDecrement * 1000).toLong()
 
-    private val maxNumberOfQuestion = 3
-
     private val playerNameToScore = mutableMapOf(nameOfFirstPlayer to 0, nameOfSecondPlayer to 0)
     private var indexOfCorrectAnswer = -1
 
-    private var work: Job
+    private var job: Job
 
     init {
-        work = GlobalScope.launch {
+        job = GlobalScope.launch {
             var quantityOfRemainingQuestions = quantityOfQuestions
             while (quantityOfRemainingQuestions > 0) {
                 val question = questionsPool.getQuestion(getNumberOfQuestion())
@@ -54,8 +56,8 @@ class GameState(
     }
 
     fun stopGame() {
-        work.cancel()
-        log("The game is canceled for clients \"${nameOfFirstPlayer}\" and \"${nameOfSecondPlayer}\"")
+        job.cancel()
+        log("The game is stopped for clients \"${nameOfFirstPlayer}\" and \"${nameOfSecondPlayer}\"")
     }
 
     fun getAnswer(playerName: String, indexOfAnswer: Int) {

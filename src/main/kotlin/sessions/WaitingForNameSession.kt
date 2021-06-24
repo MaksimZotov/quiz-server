@@ -1,11 +1,14 @@
 package sessions
 
-import common.ClientsStorage
+import Logging
+import storage.ClientsStorage
 import data.*
-import log
 import network.Client
 
 object WaitingForNameSession: Session {
+    private val logging = Logging("WaitingForNameSession")
+    private val log: (text: String) -> Unit = { text -> logging.log(text) }
+
     private val onlineSession = OnlineSession
     private val clientsWithoutName = ClientsStorage.clientsWithoutName
 
@@ -24,19 +27,19 @@ object WaitingForNameSession: Session {
     fun addClient(client: Client) {
         if (client.session == OnlineSession) {
             client.session = this
-            log("The client \"${client.playerName}\" has been moved from OnlineSession to WaitingForNameSession")
+            log("The client $client has been moved from OnlineSession to WaitingForNameSession")
         } else {
-            log("A new client has been registered")
+            log("A new client $client has been registered")
         }
         clientsWithoutName.add(client)
     }
 
     private fun handleName(name: Name, client: Client) {
-        log("The client has sent Name(\"${name.name}\")")
+        log("The client $client has sent Name(\"${name.name}\")")
         val nameStr = name.name
         if (!ClientsStorage.whoIsOnline.contains(nameStr) && !ClientsStorage.whoIsInTheGame.contains(nameStr)) {
             log("The client \"${name.name}\" is moving to OnlineSession")
-            client.playerName = nameStr
+            client.name = nameStr
             clientsWithoutName.remove(client)
             onlineSession.addClient(client)
 

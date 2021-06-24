@@ -1,4 +1,4 @@
-package questionspool
+package questions
 
 import java.sql.*
 import java.util.*
