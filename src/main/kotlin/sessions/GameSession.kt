@@ -9,28 +9,32 @@ import network.Client
 
 class GameSession(
         private val onlineSession: OnlineSession,
-        private val firstPlayer: Client,
-        private val secondPlayer: Client) : Session, GameStateSender {
+        private val players: List<Client>) : Session, GameStateSender {
 
     private val logging = Logging("GameSession")
     private val log: (text: String) -> Unit = { text -> logging.log(text) }
 
-    var gameState = GameState(this, firstPlayer.name, secondPlayer.name)
-    var firstPlayerWantsToPlayAgain = false
-    var secondPlayerWantsToPlayAgain = false
+    private val whoIsInTheGame = ClientsStorage.whoIsInTheGame
+    private val nameToClient = ClientsStorage.nameToClient
+
+    private val whoWantsToPlay = mutableMapOf<Client, Boolean>()
+    private val names = players.map { it.name }
+
+    private var gameState = GameState(this, names)
 
     init {
-        ClientsStorage.whoIsInTheGame.addAll(listOf(firstPlayer.name, secondPlayer.name))
+        ClientsStorage.whoIsInTheGame.addAll(names)
 
-        firstPlayer.session = this
-        secondPlayer.session = this
-        log("$firstPlayer and $secondPlayer have been added to GameSession")
+        players.forEach {
+            whoWantsToPlay[it] = false
+            it.session = this
+        }
+
+        log("Players $names have been added to GameSession")
 
         val playTheGame = PlayTheGame()
-        log("Sending to the client $firstPlayer PlayTheGame()")
-        firstPlayer.sendDataToClient(playTheGame)
-        log("Sending to the client $secondPlayer PlayTheGame()")
-        secondPlayer.sendDataToClient(playTheGame)
+        log("Sending to clients $names PlayTheGame()")
+        players.forEach { it.sendDataToClient(playTheGame)}
     }
 
     override fun handleDataFromClient(data: Data, client: Client) {
@@ -39,11 +43,11 @@ class GameSession(
             is LeavingTheGame -> handleLeavingTheGame(data, client)
             is RequestToPlayAgain -> handleRequestToPlayAgain(client)
             is RefusalToPlayAgain -> handleRefusalToPlayAgain(data, client)
-            is HardRemovalOfThePlayer -> handleHardRemovalOfThePlayer(client)
+            is HardRemovalOfThePlayer -> handleHardRemovalOfThePlayer(data, client)
             else -> {
                 log("Unexpected data for the session GameSession")
-                log("Hard removing the client \"${client.name}\"")
-                handleHardRemovalOfThePlayer(client)
+                log("Hard removing the client $client")
+                handleHardRemovalOfThePlayer(HardRemovalOfThePlayer(), client)
             }
         }
     }
@@ -55,77 +59,67 @@ class GameSession(
 
     private fun handleLeavingTheGame(leavingTheGame: LeavingTheGame, client: Client) {
         gameState.stopGame()
-        log("The client \"${client.name}\" has sent LeavingTheGame()")
-        val clientWhoMustBeNotified = if (client == firstPlayer) secondPlayer else firstPlayer
-        log("Sending to the client \"${clientWhoMustBeNotified.name}\" LeavingTheGame()")
-        clientWhoMustBeNotified.sendDataToClient(leavingTheGame)
-        ClientsStorage.whoIsInTheGame.remove(firstPlayer.name)
-        ClientsStorage.whoIsInTheGame.remove(secondPlayer.name)
-        onlineSession.addClient(firstPlayer)
-        onlineSession.addClient(secondPlayer)
+        log("The client $client has sent LeavingTheGame()")
+        val clientsWhoMustBeNotified = players.filter { it != client }
+        log("Sending to the clients $clientsWhoMustBeNotified LeavingTheGame()")
+        clientsWhoMustBeNotified.forEach {
+            it.sendDataToClient(leavingTheGame)
+            whoIsInTheGame.remove(it.name)
+            onlineSession.addClient(it)
+        }
     }
 
     private fun handleRequestToPlayAgain(client: Client) {
-        when (client) {
-            firstPlayer -> firstPlayerWantsToPlayAgain = true
-            secondPlayer -> secondPlayerWantsToPlayAgain = true
-        }
-        if (firstPlayerWantsToPlayAgain && secondPlayerWantsToPlayAgain) {
-            gameState = GameState(this, firstPlayer.name, secondPlayer.name)
-            firstPlayerWantsToPlayAgain = false
-            secondPlayerWantsToPlayAgain = false
-
+        whoWantsToPlay[client] = true
+        if (whoWantsToPlay.all { it.value }) {
+            gameState = GameState(this, names)
+            whoWantsToPlay.forEach { key, _ -> whoWantsToPlay[key] = false }
             val playTheGame = PlayTheGame()
-            log("Sending to the client $firstPlayer PlayTheGame()")
-            firstPlayer.sendDataToClient(playTheGame)
-            log("Sending to the client $secondPlayer PlayTheGame()")
-            secondPlayer.sendDataToClient(playTheGame)
+            log("Sending to clients $names PlayTheGame()")
+            players.forEach { it.sendDataToClient(playTheGame)}
         }
     }
 
     private fun handleRefusalToPlayAgain(refusalToPlayAgain: RefusalToPlayAgain, client: Client) {
         log("The client \"${client.name}\" has sent RefusalToPlayAgain()")
-        val clientWhoMustBeNotified = if (client == firstPlayer) secondPlayer else firstPlayer
-        log("Sending to the client \"${clientWhoMustBeNotified.name}\" RefusalToPlayAgain()")
-        clientWhoMustBeNotified.sendDataToClient(refusalToPlayAgain)
-        ClientsStorage.whoIsInTheGame.remove(firstPlayer.name)
-        ClientsStorage.whoIsInTheGame.remove(secondPlayer.name)
-        onlineSession.addClient(firstPlayer)
-        onlineSession.addClient(secondPlayer)
+        val clientsWhoMustBeNotified = players.filter { it != client }
+        log("Sending to the clients $clientsWhoMustBeNotified RefusalToPlayAgain()")
+        clientsWhoMustBeNotified.forEach {
+            it.sendDataToClient(refusalToPlayAgain)
+            whoIsInTheGame.remove(it.name)
+            onlineSession.addClient(it)
+        }
     }
 
-    private fun handleHardRemovalOfThePlayer(client: Client) {
+    private fun handleHardRemovalOfThePlayer(hardRemovalOfThePlayer: HardRemovalOfThePlayer, client: Client) {
         client.socket.close()
-        val clientWhoMustBeNotified = if (client == firstPlayer) secondPlayer else firstPlayer
-        log("Sending to the client \"${clientWhoMustBeNotified.name}\" HardRemovalOfThePlayer()")
-        clientWhoMustBeNotified.sendDataToClient(HardRemovalOfThePlayer())
-        ClientsStorage.nameToClient.remove(client.name)
-        ClientsStorage.whoIsInTheGame.remove(client.name)
+        val clientsWhoMustBeNotified = players.filter { it != client }
+        log("Sending to the clients $clientsWhoMustBeNotified HardRemovalOfThePlayer()")
+        clientsWhoMustBeNotified.forEach {
+            it.sendDataToClient(hardRemovalOfThePlayer)
+            nameToClient.remove(it.name)
+            whoIsInTheGame.remove(it.name)
+        }
     }
 
 
     override fun sendScore(playerNameToScore: Map<String, Int>) {
-        val playerScore = playerNameToScore[firstPlayer.name]!!
-        val scoreOfAnotherPlayer = playerNameToScore[secondPlayer.name]!!
-        firstPlayer.sendDataToClient(Score(playerScore, scoreOfAnotherPlayer))
-        secondPlayer.sendDataToClient(Score(scoreOfAnotherPlayer, playerScore))
+        val scoreData = Score(playerNameToScore)
+        players.forEach { it.sendDataToClient(scoreData) }
     }
 
     override fun sendQuestion(question: Triple<String, List<String>, Int>) {
         val questionData = Question(question.first, question.second, question.third)
-        firstPlayer.sendDataToClient(questionData)
-        secondPlayer.sendDataToClient(questionData)
+        players.forEach { it.sendDataToClient(questionData) }
     }
 
     override fun sendRemainingTime(remainingTime: Int) {
         val remainingTimeData = RemainingTime(remainingTime)
-        firstPlayer.sendDataToClient(remainingTimeData)
-        secondPlayer.sendDataToClient(remainingTimeData)
+        players.forEach { it.sendDataToClient(remainingTimeData) }
     }
 
     override fun sendFinish() {
         val finishData = FinishTheGame()
-        firstPlayer.sendDataToClient(finishData)
-        secondPlayer.sendDataToClient(finishData)
+        players.forEach { it.sendDataToClient(finishData) }
     }
 }

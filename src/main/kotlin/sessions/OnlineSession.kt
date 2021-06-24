@@ -14,7 +14,6 @@ object OnlineSession : Session {
     private val nameToClient = ClientsStorage.nameToClient
 
     private val clientsWhoIsOnline = mutableSetOf<Client>()
-
     private val whoInvitedToWhoIsInvited = mutableMapOf<Client, Client>()
     private val whoIsInvitedToWhoInvited = mutableMapOf<Client, Client>()
 
@@ -44,7 +43,7 @@ object OnlineSession : Session {
 
     private fun createGameSession(whoInvited: Client, whoIsInvited: Client) {
         log("Creating GameSession for $whoInvited and $whoIsInvited")
-        GameSession(this, whoInvited, whoIsInvited)
+        GameSession(this, listOf(whoInvited, whoIsInvited))
         whoInvitedToWhoIsInvited.remove(whoInvited)
         whoIsInvitedToWhoInvited.remove(whoIsInvited)
         whoIsOnline.remove(whoInvited.name)

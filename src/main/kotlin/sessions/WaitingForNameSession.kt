@@ -10,6 +10,9 @@ object WaitingForNameSession: Session {
     private val log: (text: String) -> Unit = { text -> logging.log(text) }
 
     private val onlineSession = OnlineSession
+
+    private val whoIsOnline = ClientsStorage.whoIsOnline
+    private val whoIsInTheGame = ClientsStorage.whoIsInTheGame
     private val clientsWithoutName = ClientsStorage.clientsWithoutName
 
     override fun handleDataFromClient(data: Data, client: Client) {
@@ -37,7 +40,7 @@ object WaitingForNameSession: Session {
     private fun handleName(name: Name, client: Client) {
         log("The client $client has sent Name(\"${name.name}\")")
         val nameStr = name.name
-        if (!ClientsStorage.whoIsOnline.contains(nameStr) && !ClientsStorage.whoIsInTheGame.contains(nameStr)) {
+        if (!whoIsOnline.contains(nameStr) && !whoIsInTheGame.contains(nameStr)) {
             log("The client \"${name.name}\" is moving to OnlineSession")
             client.name = nameStr
             clientsWithoutName.remove(client)
