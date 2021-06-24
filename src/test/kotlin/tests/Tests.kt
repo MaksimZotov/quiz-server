@@ -27,6 +27,7 @@ class Tests {
         GlobalScope.launch {
             val client_1: ClientStub = object : ClientStub() {
                 override fun getData(data: Data) {
+                    super.getData(data)
                     count++
                     when (count) {
                         1 -> {
@@ -50,6 +51,7 @@ class Tests {
         GlobalScope.launch {
             val client_2: ClientStub = object : ClientStub() {
                 override fun getData(data: Data) {
+                    super.getData(data)
                     count++
                     when (count) {
                         1 -> {
@@ -91,6 +93,7 @@ class Tests {
         GlobalScope.launch {
             val client_1: ClientStub = object : ClientStub() {
                 override fun getData(data: Data) {
+                    super.getData(data)
                     count++
                     when (count) {
                         1 -> {
@@ -137,6 +140,7 @@ class Tests {
         GlobalScope.launch {
             val client_2: ClientStub = object : ClientStub() {
                 override fun getData(data: Data) {
+                    super.getData(data)
                     count++
                     when (count) {
                         1 -> {

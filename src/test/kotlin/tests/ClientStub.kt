@@ -4,6 +4,8 @@ import clientside.Observer
 import clientside.ReceiverFromServer
 import clientside.SenderToServer
 import data.Data
+import data.Ping
+import data.Pong
 
 abstract class ClientStub : Observer {
     private val receiverFromServer = ReceiverFromServer(this)
@@ -11,7 +13,12 @@ abstract class ClientStub : Observer {
 
     var count = 0
 
-    abstract override fun getData(data: Data)
+    override fun getData(data: Data) {
+        if (data is Ping) {
+            sendData(Pong())
+            return
+        }
+    }
 
     fun createConnection() {
         senderToServer.createConnection()
