@@ -38,7 +38,7 @@ class Client(val socket: Socket, var session: Session) {
                     }
                     session.handleDataFromClient(data, thisClient)
                 } catch (ex: Exception) {
-                    log("An error occurred while sending the data to the client $thisClient")
+                    log("An error occurred while reading the data from the client $thisClient")
                     log("Hard removing the client $thisClient")
                     session.handleDataFromClient(HardRemovalOfThePlayer(), thisClient)
                     break
@@ -61,15 +61,7 @@ class Client(val socket: Socket, var session: Session) {
 
     fun sendPing() {
         receivedPong = false
-        try {
-            output.writeObject(Ping())
-            output.flush()
-            output.reset()
-        } catch (ex: Exception) {
-            log("An error occurred while sending the data to the client $thisClient")
-            log("Hard removing the client $thisClient")
-            session.handleDataFromClient(HardRemovalOfThePlayer(), this)
-        }
+        sendDataToClient(Ping())
     }
 
     override fun toString(): String {
