@@ -92,6 +92,7 @@ class GameSession(
     }
 
     private fun handleHardRemovalOfThePlayer(hardRemovalOfThePlayer: HardRemovalOfThePlayer, client: Client) {
+        gameState.stopGame()
         client.stop()
         whoIsInTheGame.remove(client.name)
         nameToClient.remove(client.name)

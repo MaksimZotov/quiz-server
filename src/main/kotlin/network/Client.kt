@@ -21,13 +21,13 @@ class Client(private val socket: Socket, var session: Session) {
     private val thisClient = this
 
     lateinit var name: String
+    var receivedPong = true
 
     private lateinit var input: ObjectInputStream
     private lateinit var output: ObjectOutputStream
 
-    var receivedPong = true
-
-    val job: Job
+    private val job: Job
+    private var jobIsClosed = false
 
     init {
         try {
@@ -43,18 +43,26 @@ class Client(private val socket: Socket, var session: Session) {
             while (true) {
                 try {
                     val data = input.readObject() as Data
-                    log("The server has received the data from the client $thisClient")
-                    if (data is Pong) {
-                        log("The client $thisClient has sent Pong()")
-                        receivedPong = true
-                        continue
+                    if (!jobIsClosed) {
+                        log("The server has received the data from the client $thisClient")
+                        if (data is Pong) {
+                            log("The client $thisClient has sent Pong()")
+                            receivedPong = true
+                            continue
+                        }
+                        session.handleDataFromClient(data, thisClient)
+                    } else {
+                        break
                     }
-                    session.handleDataFromClient(data, thisClient)
                 } catch (ex: Exception) {
-                    log("An error occurred while reading the data from the client $thisClient")
-                    log("Hard removing the client $thisClient")
-                    session.handleDataFromClient(HardRemovalOfThePlayer(), thisClient)
-                    break
+                    if (!jobIsClosed) {
+                        log("An error occurred while reading the data from the client $thisClient")
+                        log("Hard removing the client $thisClient")
+                        session.handleDataFromClient(HardRemovalOfThePlayer(), thisClient)
+                        break
+                    } else {
+                        break
+                    }
                 }
             }
         }
@@ -78,7 +86,7 @@ class Client(private val socket: Socket, var session: Session) {
     }
 
     fun stop() {
-        job.cancel()
+        jobIsClosed = true
         socket.close()
         log("The client $this has been stopped")
     }
