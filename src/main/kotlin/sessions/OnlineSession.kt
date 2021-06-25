@@ -86,7 +86,7 @@ object OnlineSession : Session {
         val whoIsInvited = nameToClient[invitation.name]!!
 
         val clientInvitedSomeone = whoInvitedToWhoIsInvited.contains(client)
-        val clientIsInvitedBySomeone = whoIsInvitedToWhoInvited.contains(whoIsInvited)
+        val clientIsInvitedBySomeone = whoIsInvitedToWhoInvited.contains(client)
 
         when {
             !clientInvitedSomeone && !clientIsInvitedBySomeone -> {
