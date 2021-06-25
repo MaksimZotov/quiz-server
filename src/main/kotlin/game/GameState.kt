@@ -12,7 +12,7 @@ class GameState(
         private val gameStateSender: GameStateSender,
         private val names: List<String>) {
 
-    private val maxNumberOfQuestion = 3
+    private val maxNumberOfQuestion = 10
     private val quantityOfQuestions = 5
     private val timeToAnswer = 10
     private val timeDecrement = 1

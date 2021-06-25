@@ -200,4 +200,73 @@ class Tests {
         }
         sleep(70000)
     }
+
+    @Test
+    fun testLeavingAfterInvitation_1() {
+        // Client_1
+        GlobalScope.launch {
+            val logging = Logging("Client_1")
+            val log: (text: String) -> Unit = { text -> logging.log(text)}
+
+            val client_1: ClientStub = object : ClientStub() {
+                override fun getData(data: Data) {
+                    super.getData(data)
+                    log("The client has received: $data")
+                    if (data is Invitation) {
+                        val accepting = AcceptingTheInvitation(data.name)
+                        log("Delay 1 second...")
+                        sleep(1000)
+                        log("Sending $accepting")
+                        sendData(accepting)
+                    }
+                }
+            }
+            log("The client has been created")
+
+            log("Creating connection")
+            client_1.createConnection()
+
+            log("Sending Name(\"Test_1\")")
+            client_1.sendData(Name("Test_1"))
+        }
+
+        // Client_2
+        GlobalScope.launch {
+            val logging = Logging("Client_2")
+            val log: (text: String) -> Unit = { text -> logging.log(text)}
+
+            val client_2: ClientStub = object : ClientStub() {
+                override fun getData(data: Data) {
+                    super.getData(data)
+                    log("The client has received: $data")
+                }
+            }
+            log("The client has been created")
+
+            log("Delay 1 second...")
+            delay(1000)
+
+            log("Creating connection")
+            client_2.createConnection()
+
+            log("Sending Name(\"Test_2\")")
+            client_2.sendData(Name("Test_2"))
+
+            log("Sending Invitation(\"Test_1\")")
+            client_2.sendData(Invitation("Test_1"))
+
+            log("Sending NameChange()")
+            client_2.sendData(NameChange())
+
+            log("Delay 2 seconds...")
+            delay(2000)
+
+            log("Sending Name(\"Test_2\")")
+            client_2.sendData(Name("Test_2"))
+
+            log("Sending Invitation(\"Test_1\")")
+            client_2.sendData(Invitation("Test_1"))
+        }
+        sleep(6000)
+    }
 }
