@@ -127,10 +127,11 @@ object OnlineSession : Session {
 
                 } else {
 
-                    log("Invitation($client) has been sent to the client $whoIsInvited earlier")
+                    log("Invitation($client) was sent to the client $whoIsInvited earlier")
 
-                    log("The client $client is waiting for " +
-                            "AcceptingTheInvitation($client) from the client $whoIsInvited")
+                    log("Sending the invitation again...")
+
+                    waitForAcceptingTheInvitation(client, whoIsInvited)
                 }
             }
             !clientInvitedSomeone && clientIsInvitedBySomeone -> {
@@ -152,10 +153,17 @@ object OnlineSession : Session {
                     log("Sending to the client $whoIsInvited " +
                             "InvitedPlayerIsDecidingWhetherToPlayWithAnotherPlayer($client)")
 
-                    whoIsInvited.sendDataToClient(InvitedPlayerIsDecidingWhetherToPlayWithAnotherPlayer(client.name))
+                    whoInvitedTheClientEarlier.sendDataToClient(
+                            InvitedPlayerIsDecidingWhetherToPlayWithAnotherPlayer(client.name)
+                    )
 
-                    log("The client \"${whoInvitedTheClientEarlier.name}\" is waiting for " +
+                    whoInvitedToWhoIsInvited.remove(whoInvitedTheClientEarlier)
+                    whoIsInvitedToWhoInvited.remove(client)
+
+                    log("From now the client \"${whoInvitedTheClientEarlier.name}\" does not wait for " +
                             "AcceptingTheInvitation($client) from the client $client")
+
+                    waitForAcceptingTheInvitation(client, whoIsInvited)
                 }
             }
         }
