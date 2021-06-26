@@ -17,10 +17,11 @@ object Cleaner {
         log("The cleaner is running")
         GlobalScope.launch {
             while (true) {
-                val clients = ClientsStorage.nameToClient.values + ClientsStorage.clientsWithoutName
-                clients.forEach { it.sendPing() }
+                val clientsBefore = ClientsStorage.nameToClient.values + ClientsStorage.clientsWithoutName
+                clientsBefore.forEach { it.sendPing() }
                 delay(timeDelay)
-                clients.forEach {
+                val clientsAfter = ClientsStorage.nameToClient.values + ClientsStorage.clientsWithoutName
+                clientsAfter.forEach {
                     if (!it.receivedPong) {
                         log("Removing the client $it")
                         it.session.handleDataFromClient(hardRemovalOfThePlayer, it)
