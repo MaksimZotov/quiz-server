@@ -12,7 +12,7 @@ class Invitation(val name: String): Data
 class InvitationMyself(): Data
 class IncorrectInvitation(val name: String): Data
 class InvitedPlayerIsDecidingWhetherToPlayWithAnotherPlayer(val name: String): Data
-class ThePlayerWhoInvitedYouIsWaitingForAcceptingTheInvitationFromAnotherPlayer(val name: String): Data
+class PlayerWhoInvitedYouIsWaitingForAcceptingTheInvitationFromAnotherPlayer(val name: String): Data
 class AcceptingTheInvitation(val name: String): Data
 class IncorrectAcceptingTheInvitation(val name: String): Data
 class PlayTheGame(): Data
