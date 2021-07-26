@@ -28,44 +28,33 @@ class GameState(
     private var indexOfCorrectAnswer = -1
 
     private var job: Job
-    private var jobIsClosed = false
 
     init {
         names.forEach { playerNameToScore[it] = 0 }
 
         job = GlobalScope.launch {
             var quantityOfRemainingQuestions = quantityOfQuestions
-            loop@ while (quantityOfRemainingQuestions > 0) {
+            while (quantityOfRemainingQuestions > 0) {
                 val question = questionsPool.getQuestion(getNumberOfQuestion())
                 log("Sending to clients $names the question $question")
-                if (!jobIsClosed) {
-                    gameStateSender.sendQuestion(question)
-                } else {
-                    break
-                }
+                gameStateSender.sendQuestion(question)
                 indexOfCorrectAnswer = question.third
                 var remainingTime = timeToAnswer
                 while (remainingTime >= 0) {
                     log("Sending to clients $names the remaining time $remainingTime")
-                    if (!jobIsClosed) {
-                        gameStateSender.sendRemainingTime(remainingTime)
-                    } else {
-                        break@loop
-                    }
+                    gameStateSender.sendRemainingTime(remainingTime)
                     delay(timeDelay)
                     remainingTime -= timeDecrement
                 }
                 quantityOfRemainingQuestions--
             }
-            if (!jobIsClosed) {
-                log("Sending to clients $names that game is finished")
-                gameStateSender.sendFinish()
-            }
+            log("Sending to clients $names that game is finished")
+            gameStateSender.sendFinish()
         }
     }
 
     fun stopGame() {
-        jobIsClosed = true
+        job.cancel()
         log("The game is stopped for clients $names")
     }
 
