@@ -36,7 +36,11 @@ object Database : QuestionsPool {
             result.next()
             return Triple(
                     result.getString("Question"),
-                    listOf(result.getString("Answer 1"), result.getString("Answer 2"), result.getString("Answer 3")),
+                    listOf(
+                        result.getString("Answer 1"),
+                        result.getString("Answer 2"),
+                        result.getString("Answer 3")
+                    ),
                     result.getInt("Correct answer")
             )
         } catch (ex: SQLException) {

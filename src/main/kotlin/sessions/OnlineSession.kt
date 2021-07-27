@@ -112,7 +112,7 @@ object OnlineSession : Session {
 
                     whoWasInvitedByTheClientEarlier
                             .sendDataToClient(
-                                    ThePlayerWhoInvitedYouIsWaitingForAcceptingTheInvitationFromAnotherPlayer(
+                                    PlayerWhoInvitedYouIsWaitingForAcceptingTheInvitationFromAnotherPlayer(
                                             client.name
                                     )
                             )
